@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="P2PReview.Application/P2PReview.Application.csproj" />
+  <Project Path="P2PReview.Domain/P2PReview.Domain.csproj" />
+  <Project Path="P2PReview.Infrastructure/P2PReview.Infrastructure.csproj" />
+  <Project Path="P2PReview.Web/P2PReview.Web.csproj" />
+</Solution>
