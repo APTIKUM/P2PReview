@@ -1,0 +1,121 @@
+﻿@page "/login"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Components
+@using Shared.Layout
+@inject NavigationManager NavigationManager
+@layout AuthLayout
+
+<link rel="stylesheet" href="css/auth.css" />
+
+<div class="auth-container">
+    <div class="auth-card">
+        <h2 class="auth-title">Вход в систему</h2>
+
+        <EditForm Model="@loginModel"
+                  OnValidSubmit="HandleLogin"
+                  FormName="loginForm">
+
+            <DataAnnotationsValidator />
+
+            <!-- EMAIL -->
+            <div class="form-group">
+                <label class="form-label">Email</label>
+
+                <div class="input-with-icon">
+                    <i class="fas fa-envelope input-icon"></i>
+
+                    <InputText class="form-control"
+                               placeholder="Введите ваш email"
+                               @bind-Value="loginModel.Email" />
+                </div>
+
+                <ValidationMessage For="@(() => loginModel.Email)" />
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="form-group">
+                <label class="form-label">Пароль</label>
+
+                <div class="input-with-icon">
+                    <i class="fas fa-lock input-icon"></i>
+
+                    <input class="form-control"
+                           placeholder="Введите пароль"
+                           type="@(showPassword ? "text" : "password")"
+                           @bind="loginModel.Password" />
+
+                    <button type="button"
+                            class="password-toggle"
+                            @onclick="TogglePassword">
+                        @if (showPassword)
+                        {
+                            <i class="fas fa-eye-slash"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-eye"></i>
+                        }
+                    </button>
+                </div>
+
+                <div class="password-hints">
+                    <span></span>
+                    <a href="/forgot-password" class="forgot-link">Забыли пароль?</a>
+                </div>
+
+                <ValidationMessage For="@(() => loginModel.Password)" />
+            </div>
+
+            <!-- SUBMIT -->
+            <button type="submit" class="btn btn-primary btn-login">
+                Войти
+            </button>
+
+        </EditForm>
+
+        <div class="divider">
+            <span>или</span>
+        </div>
+
+        <div class="oauth-buttons">
+            <button class="btn btn-outline btn-oauth" @onclick="LoginWithGitHub">
+                <i class="fab fa-github"></i>
+                Войти через GitHub
+            </button>
+
+            <button class="btn btn-outline btn-oauth" @onclick="LoginWithGitLab">
+                <i class="fab fa-gitlab"></i>
+                Войти через GitLab
+            </button>
+        </div>
+
+        <div class="register-link">
+            Нет аккаунта? <a href="/register">Регистрация</a>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel = new();
+    private bool showPassword;
+
+    private void TogglePassword()
+    {
+        showPassword = !showPassword;
+    }
+
+    private async Task HandleLogin()
+    {
+        await Task.Delay(300);
+        NavigationManager.NavigateTo("/");
+    }
+
+    private Task LoginWithGitHub() => Task.CompletedTask;
+    private Task LoginWithGitLab() => Task.CompletedTask;
+
+    public class LoginModel
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+    }
+}

@@ -1,0 +1,167 @@
+﻿@page "/register"
+@rendermode InteractiveServer
+@using Microsoft.AspNetCore.Identity
+@using P2PReview.Domain
+@using Shared.Layout
+
+@inject UserManager<User> UserManager
+@inject NavigationManager Nav
+
+@layout AuthLayout
+
+<link rel="stylesheet" href="css/auth.css" />
+
+<div class="auth-container">
+    <div class="auth-card">
+
+        <h2 class="auth-title">Регистрация</h2>
+
+        <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
+            <DataAnnotationsValidator />
+
+            <!-- EMAIL -->
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-envelope input-icon"></i>
+                    <InputText class="form-control"
+                               @bind-Value="registerModel.Email"
+                               placeholder="Введите email" />
+                </div>
+                <ValidationMessage For="@(() => registerModel.Email)" />
+            </div>
+
+            <!-- PASSWORD -->
+            <div class="form-group">
+                <label class="form-label">Пароль</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-lock input-icon"></i>
+                    <InputText class="form-control"
+                               type="@(showPassword ? "text" : "password")"
+                               @bind-Value="registerModel.Password"
+                               placeholder="Введите пароль" />
+
+                    <button type="button"
+                            class="password-toggle"
+                            @onclick="TogglePassword">
+                        @if (showPassword)
+                        {
+                            <i class="fas fa-eye-slash"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-eye"></i>
+                        }
+                    </button>
+
+                </div>
+
+                <div class="password-hints">
+                    <span>Минимум 8 символов</span>
+                </div>
+
+                <ValidationMessage For="@(() => registerModel.Password)" />
+            </div>
+
+            <!-- CONFIRM PASSWORD -->
+            <div class="form-group">
+                <label class="form-label">Подтверждение пароля</label>
+                <div class="input-with-icon">
+                    <i class="fas fa-lock input-icon"></i>
+                    <InputText class="form-control"
+                               type="@(showConfirmPassword ? "text" : "password")"
+                               @bind-Value="registerModel.ConfirmPassword"
+                               placeholder="Повторите пароль" />
+
+
+                    <button type="button"
+                            class="password-toggle"
+                            @onclick="ToggleConfirmPassword">
+                        @if (showConfirmPassword)
+                        {
+                            <i class="fas fa-eye-slash"></i>
+                        }
+                        else
+                        {
+                            <i class="fas fa-eye"></i>
+                        }
+                    </button>
+                </div>
+                <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
+            </div>
+
+            @if (!string.IsNullOrEmpty(message))
+            {
+                <div class="validation-message" style="margin-top:10px;">
+                    @message
+                </div>
+            }
+
+            <!-- SUBMIT -->
+            <button type="submit" class="btn btn-primary btn-login">
+                Создать аккаунт
+            </button>
+        </EditForm>
+
+        <div class="divider">
+            <span>или</span>
+        </div>
+
+        <div class="register-link">
+            Уже есть аккаунт?
+            <a href="/login">Войти</a>
+        </div>
+
+    </div>
+</div>
+
+@code {
+    private RegisterModel registerModel = new();
+    private string message;
+
+    private bool showPassword;
+    private bool showConfirmPassword;
+
+    private void TogglePassword()
+    {
+        showPassword = !showPassword;
+    }
+
+    private void ToggleConfirmPassword()
+    {
+        showConfirmPassword = !showConfirmPassword;
+    }
+
+    private async Task HandleRegister()
+    {
+        if (registerModel.Password != registerModel.ConfirmPassword)
+        {
+            message = "Пароли не совпадают";
+            return;
+        }
+
+        var user = new User
+        {
+            UserName = registerModel.Email,
+            Email = registerModel.Email
+        };
+
+        var result = await UserManager.CreateAsync(user, registerModel.Password);
+
+        if (result.Succeeded)
+        {
+            Nav.NavigateTo("/login");
+        }
+        else
+        {
+            message = string.Join(", ", result.Errors.Select(x => x.Description));
+        }
+    }
+
+    public class RegisterModel
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+        public string ConfirmPassword { get; set; } = "";
+    }
+}
