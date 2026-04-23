@@ -19,4 +19,8 @@
     <ProjectReference Include="..\P2PReview.Infrastructure\P2PReview.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Shared\Routing\" />
+  </ItemGroup>
+
 </Project>

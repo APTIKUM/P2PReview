@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using P2PReview.Domain;
@@ -14,12 +15,33 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite("Data Source=app.db"));
 
 builder.Services
-    .AddIdentity<User, IdentityRole>()
+    .AddIdentity<User, IdentityRole>(options => 
+    { 
+        options.Password.RequiredLength = 8;
+    })
+    .AddErrorDescriber<RussianIdentityErrorDescriber>()
     .AddEntityFrameworkStores<AppDbContext>()
     .AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/login";
+});
+
+
+builder.Services.AddHttpClient();
+
+builder.Services.AddControllers();
+
+builder.Services.AddScoped(sp =>
+{
+    var nav = sp.GetRequiredService<NavigationManager>();
+
+    return new HttpClient
+    {
+        BaseAddress = new Uri(nav.BaseUri)
+    };
+});
 
 var app = builder.Build();
 
@@ -35,16 +57,14 @@ app.UseHttpsRedirection();
 
 app.UseAntiforgery();
 
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapStaticAssets();
+
+app.MapControllers();
+
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
-
-//app.Run(async (context) =>
-//{
-//    if (context.Request.Path == "/")
-//    {
-//        context.Response.Redirect("/login");
-//    }
-//});
 
 app.Run();

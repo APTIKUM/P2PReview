@@ -1,22 +1,26 @@
 ﻿@page "/register"
 @rendermode InteractiveServer
+
 @using Microsoft.AspNetCore.Identity
 @using P2PReview.Domain
 @using Shared.Layout
+@using System.ComponentModel.DataAnnotations
 
-@inject UserManager<User> UserManager
+@inject NavigationManager Nav
+@inject HttpClient Http
 @inject NavigationManager Nav
 
 @layout AuthLayout
-
-<link rel="stylesheet" href="css/auth.css" />
 
 <div class="auth-container">
     <div class="auth-card">
 
         <h2 class="auth-title">Регистрация</h2>
 
-        <EditForm Model="@registerModel" OnValidSubmit="HandleRegister">
+        <EditForm Model="@registerModel"
+                  OnValidSubmit="HandleRegister"
+                  FormName="registerForm">
+
             <DataAnnotationsValidator />
 
             <!-- EMAIL -->
@@ -36,6 +40,7 @@
                 <label class="form-label">Пароль</label>
                 <div class="input-with-icon">
                     <i class="fas fa-lock input-icon"></i>
+
                     <InputText class="form-control"
                                type="@(showPassword ? "text" : "password")"
                                @bind-Value="registerModel.Password"
@@ -53,11 +58,6 @@
                             <i class="fas fa-eye"></i>
                         }
                     </button>
-
-                </div>
-
-                <div class="password-hints">
-                    <span>Минимум 8 символов</span>
                 </div>
 
                 <ValidationMessage For="@(() => registerModel.Password)" />
@@ -68,11 +68,11 @@
                 <label class="form-label">Подтверждение пароля</label>
                 <div class="input-with-icon">
                     <i class="fas fa-lock input-icon"></i>
+
                     <InputText class="form-control"
                                type="@(showConfirmPassword ? "text" : "password")"
                                @bind-Value="registerModel.ConfirmPassword"
                                placeholder="Повторите пароль" />
-
 
                     <button type="button"
                             class="password-toggle"
@@ -87,13 +87,15 @@
                         }
                     </button>
                 </div>
+
                 <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
             </div>
 
-            @if (!string.IsNullOrEmpty(message))
+            <!-- SERVER ERROR -->
+            @if (!string.IsNullOrWhiteSpace(errorMessage))
             {
-                <div class="validation-message" style="margin-top:10px;">
-                    @message
+                <div class="validation-message" style="margin: 10px 0;">
+                    @errorMessage
                 </div>
             }
 
@@ -101,6 +103,7 @@
             <button type="submit" class="btn btn-primary btn-login">
                 Создать аккаунт
             </button>
+
         </EditForm>
 
         <div class="divider">
@@ -117,51 +120,54 @@
 
 @code {
     private RegisterModel registerModel = new();
-    private string message;
+    private string errorMessage;
 
     private bool showPassword;
     private bool showConfirmPassword;
 
     private void TogglePassword()
-    {
-        showPassword = !showPassword;
-    }
+        => showPassword = !showPassword;
 
     private void ToggleConfirmPassword()
-    {
-        showConfirmPassword = !showConfirmPassword;
-    }
+        => showConfirmPassword = !showConfirmPassword;
 
     private async Task HandleRegister()
     {
+        errorMessage = "";
+
         if (registerModel.Password != registerModel.ConfirmPassword)
         {
-            message = "Пароли не совпадают";
+            errorMessage = "Пароли не совпадают";
             return;
         }
 
-        var user = new User
+        var response = await Http.PostAsJsonAsync("api/auth/register", new
         {
-            UserName = registerModel.Email,
-            Email = registerModel.Email
-        };
+            Email = registerModel.Email,
+            Password = registerModel.Password
+        });
 
-        var result = await UserManager.CreateAsync(user, registerModel.Password);
-
-        if (result.Succeeded)
+        if (response.IsSuccessStatusCode)
         {
-            Nav.NavigateTo("/login");
+            Nav.NavigateTo("/login", forceLoad: true);
         }
         else
         {
-            message = string.Join(", ", result.Errors.Select(x => x.Description));
+            errorMessage = await response.Content.ReadAsStringAsync();
         }
     }
 
     public class RegisterModel
     {
+        [Required(ErrorMessage = "Введите email")]
+        [EmailAddress(ErrorMessage = "Некорректный email")]
         public string Email { get; set; } = "";
+
+        [Required(ErrorMessage = "Введите пароль")]
+        [MinLength(8, ErrorMessage = "Минимум 8 символов")]
         public string Password { get; set; } = "";
+
+        [Required(ErrorMessage = "Повторите пароль")]
         public string ConfirmPassword { get; set; } = "";
     }
 }
