@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using P2PReview.Domain;
+using P2PReview.Domain.Entities;
 
 namespace P2PReview.Infrastructure
 {

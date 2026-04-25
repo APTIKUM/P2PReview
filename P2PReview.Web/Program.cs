@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using P2PReview.Domain;
+using P2PReview.Application.Interfaces;
+using P2PReview.Domain.Entities;
 using P2PReview.Infrastructure;
+using P2PReview.Infrastructure.Services;
 using P2PReview.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,10 +28,11 @@ builder.Services
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/login";
+
 });
 
-
-builder.Services.AddHttpClient();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IUserService, UserService>();
 
 builder.Services.AddControllers();
 
@@ -52,6 +55,7 @@ if (!app.Environment.IsDevelopment())
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
 app.UseStatusCodePagesWithReExecute("/not-found", createScopeForStatusCodePages: true);
 app.UseHttpsRedirection();
 

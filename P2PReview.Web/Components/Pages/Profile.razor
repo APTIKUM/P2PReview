@@ -1,40 +1,109 @@
-﻿@page "/profile"
-@attribute [Authorize]
+﻿@page "/profile/{userId:guid}"
 
-@using System.Security.Claims
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
+@using P2PReview.Application.Interfaces
+@using P2PReview.Application.User.DTOs
+@using P2PReview.Application.User.Queries
+@using System.Security.Claims
 
-@inject AuthenticationStateProvider AuthenticationStateProvider
+@rendermode InteractiveServer
 
-<h1>User Profile</h1>
+@attribute [Authorize]
 
-@if (user is null)
+@inject IUserService UserService
+@inject NavigationManager Nav
+@inject AuthenticationStateProvider AuthStateProvider
+
+<h3>Профиль</h3>
+
+@if (isLoading)
 {
     <p>Загрузка...</p>
 }
+else if (profile is null)
+{
+    <p>Пользователь не найден</p>
+}
 else
 {
-    <div class="card p-3">
-        <p><strong>Name:</strong> @user.Identity?.Name</p>
-        <p><strong>Authenticated:</strong> @user.Identity?.IsAuthenticated</p>
+    <div class="profile-card">
 
-        <h5>Claims:</h5>
-        <ul>
-            @foreach (var claim in user.Claims)
-            {
-                <li>@claim.Type : @claim.Value</li>
-            }
-        </ul>
+        <div class="header">
+            <img src="@profile.AvatarUrl" class="avatar" />
+
+            <div>
+                <h4>@profile.UserName</h4>
+                <p>Quality Score: @profile.QualityScore</p>
+            </div>
+        </div>
+
+
+        <h5>Последние ревью</h5>
+
+        @if (false == true)
+        {
+        }
+        else
+        {
+            <p>Нет ревью</p>
+        }
+
+        @if (profile.IsOwnProfile)
+        {
+            <div class="actions">
+                <button @onclick="GoToEdit">Редактировать</button>
+            </div>
+        }
     </div>
 }
 
 @code {
-    private ClaimsPrincipal? user;
+    [Parameter] public Guid UserId { get; set; }
+
+    private UserProfileDto? profile;
+    private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        user = authState.User;
+        await LoadProfile();
+    }
+
+    private async Task LoadProfile()
+    {
+        isLoading = true;
+
+        try
+        {
+            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+
+            var currentUserIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+            Guid? currentUserId = Guid.TryParse(currentUserIdClaim, out var id)
+                ? id
+                : null;
+
+            if (currentUserId == null)
+            {
+                profile = null;
+                return;
+            }
+
+            var query = new GetUserProfileQuery(UserId, currentUserId);
+            
+            profile = await UserService.GetUserProfileAsync(query);
+        }
+        catch
+        {
+            profile = null;
+        }
+
+        isLoading = false;
+    }
+
+    private void GoToEdit()
+    {
+        Nav.NavigateTo("/settings/profile");
     }
 }
