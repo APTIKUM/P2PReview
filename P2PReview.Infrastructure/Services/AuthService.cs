@@ -48,7 +48,8 @@ namespace P2PReview.Infrastructure.Services
             var user = new User
             {
                 UserName = registerCommand.Email,
-                Email = registerCommand.Email
+                Email = registerCommand.Email,
+                CreatedAt = DateTime.UtcNow,
             };
 
             var result = await _userManager.CreateAsync(user, registerCommand.Password);
