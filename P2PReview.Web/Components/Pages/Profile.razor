@@ -4,7 +4,6 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using P2PReview.Application.Interfaces
 @using P2PReview.Application.User.DTOs
-@using P2PReview.Application.User.Queries
 @using System.Security.Claims
 
 @rendermode InteractiveServer
@@ -13,7 +12,6 @@
 
 @inject IUserService UserService
 @inject NavigationManager Nav
-@inject AuthenticationStateProvider AuthStateProvider
 
 <h3>Профиль</h3>
 
@@ -74,25 +72,8 @@ else
         isLoading = true;
 
         try
-        {
-            var authState = await AuthStateProvider.GetAuthenticationStateAsync();
-            var user = authState.User;
-
-            var currentUserIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            Guid? currentUserId = Guid.TryParse(currentUserIdClaim, out var id)
-                ? id
-                : null;
-
-            if (currentUserId == null)
-            {
-                profile = null;
-                return;
-            }
-
-            var query = new GetUserProfileQuery(UserId, currentUserId);
-            
-            profile = await UserService.GetUserProfileAsync(query);
+        {            
+            profile = await UserService.GetUserProfileAsync(UserId);
         }
         catch
         {
