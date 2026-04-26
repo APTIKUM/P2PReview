@@ -1,5 +1,4 @@
 ﻿@page "/profile/{userId:guid}"
-
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using P2PReview.Application.Interfaces
@@ -7,54 +6,438 @@
 @using System.Security.Claims
 
 @rendermode InteractiveServer
-
 @attribute [Authorize]
 
 @inject IUserService UserService
 @inject NavigationManager Nav
 
-<h3>Профиль</h3>
-
 @if (isLoading)
 {
-    <p>Загрузка...</p>
+    <div class="profile-skeleton">
+        <div class="skeleton-avatar"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line short"></div>
+    </div>
 }
 else if (profile is null)
 {
-    <p>Пользователь не найден</p>
+    <div class="profile-error">
+        <div class="error-icon">:(</div>
+        <h3>Пользователь не найден</h3>
+        <p>Возможно, аккаунт был удалён или ссылка неверна</p>
+    </div>
 }
 else
 {
-    <div class="profile-card">
+    <div class="profile-container">
+        <div class="profile-card">
+            <!-- Cover -->
+            <div class="profile-cover"></div>
 
-        <div class="header">
-            <img src="@profile.AvatarUrl" class="avatar" />
+            <!-- Avatar and Header -->
+            <div class="profile-header">
+                <div class="avatar-wrapper">
+                    @if (!string.IsNullOrEmpty(profile.AvatarUrl))
+                    {
+                        <img src="@profile.AvatarUrl" class="avatar" />
+                    }
+                    else
+                    {
+                        <div class="avatar-placeholder">
+                            @GetInitials(profile.UserName)
+                        </div>
+                    }
+                </div>
 
-            <div>
-                <h4>@profile.UserName</h4>
-                <p>Quality Score: @profile.QualityScore</p>
+                <div class="profile-info">
+                    <h2 class="username">@profile.UserName</h2>
+                    
+                    <div class="quality-score">
+                        <span class="score-value">@profile.QualityScore</span>
+                        <span class="score-label">Quality Score</span>
+                    </div>
+                    
+                    <div class="joined-date">
+                        На сайте с @profile.CreatedAt.ToString("dd.MM.yyyy")
+                    </div>
+                </div>
+
+                @if (profile.IsOwnProfile)
+                {
+                    <button class="btn-edit" @onclick="GoToEdit">
+                        Редактировать профиль
+                    </button>
+                }
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value">@profile.ReviewsGiven</div>
+                    <div class="stat-label">Всего ревью</div>
+                </div>
+                
+                <div class="stat-card difficulty-easy">
+                    <div class="stat-value">@profile.ReviewsEasy</div>
+                    <div class="stat-label">Easy</div>
+                </div>
+                
+                <div class="stat-card difficulty-normal">
+                    <div class="stat-value">@profile.ReviewsNormal</div>
+                    <div class="stat-label">Normal</div>
+                </div>
+                
+                <div class="stat-card difficulty-hard">
+                    <div class="stat-value">@profile.ReviewsHard</div>
+                    <div class="stat-label">Hard</div>
+                </div>
+            </div>
+
+            <!-- Distribution Bars -->
+            <div class="distribution-section">
+                <h3 class="section-title">Распределение по сложности</h3>
+                
+                <div class="distribution-bars">
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-label easy">Easy</span>
+                            <span class="bar-percent">@GetPercentage(profile.ReviewsEasy, profile.ReviewsGiven)%</span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill easy" style="width: @GetPercentage(profile.ReviewsEasy, profile.ReviewsGiven)%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-label normal">Normal</span>
+                            <span class="bar-percent">@GetPercentage(profile.ReviewsNormal, profile.ReviewsGiven)%</span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill normal" style="width: @GetPercentage(profile.ReviewsNormal, profile.ReviewsGiven)%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="bar-item">
+                        <div class="bar-header">
+                            <span class="bar-label hard">Hard</span>
+                            <span class="bar-percent">@GetPercentage(profile.ReviewsHard, profile.ReviewsGiven)%</span>
+                        </div>
+                        <div class="bar-track">
+                            <div class="bar-fill hard" style="width: @GetPercentage(profile.ReviewsHard, profile.ReviewsGiven)%"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
-
-
-        <h5>Последние ревью</h5>
-
-        @if (false == true)
-        {
-        }
-        else
-        {
-            <p>Нет ревью</p>
-        }
-
-        @if (profile.IsOwnProfile)
-        {
-            <div class="actions">
-                <button @onclick="GoToEdit">Редактировать</button>
-            </div>
-        }
     </div>
 }
+
+<style>
+    .profile-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .profile-card {
+        background: white;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    .profile-cover {
+        height: 160px;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    }
+
+    .profile-header {
+        padding: 0 32px 32px 32px;
+        position: relative;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 20px;
+    }
+
+    .avatar-wrapper {
+        margin-top: -64px;
+    }
+
+    .avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 4px solid white;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        background: white;
+    }
+
+    .avatar-placeholder {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 48px;
+        font-weight: 600;
+        color: white;
+        border: 4px solid white;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    }
+
+    .profile-info {
+        flex: 1;
+    }
+
+    .username {
+        font-size: 28px;
+        font-weight: 600;
+        margin: 0 0 12px 0;
+        color: #1e293b;
+    }
+
+    .quality-score {
+        display: inline-flex;
+        align-items: baseline;
+        gap: 8px;
+        background: #f1f5f9;
+        padding: 6px 16px;
+        border-radius: 32px;
+        margin-bottom: 12px;
+    }
+
+    .score-value {
+        font-size: 22px;
+        font-weight: 700;
+        color: #6366f1;
+    }
+
+    .score-label {
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .joined-date {
+        font-size: 13px;
+        color: #94a3b8;
+    }
+
+    .btn-edit {
+        background: white;
+        border: 1.5px solid #e2e8f0;
+        color: #475569;
+        padding: 10px 28px;
+        border-radius: 40px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+
+    .btn-edit:hover {
+        border-color: #6366f1;
+        color: #6366f1;
+        background: #f8fafc;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        padding: 0 32px 32px 32px;
+    }
+
+    .stat-card {
+        background: #f8fafc;
+        padding: 20px;
+        border-radius: 16px;
+        text-align: center;
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .stat-value {
+        font-size: 32px;
+        font-weight: 700;
+        margin-bottom: 8px;
+    }
+
+    .stat-label {
+        font-size: 13px;
+        font-weight: 500;
+        color: #64748b;
+    }
+
+    .stat-card .stat-value {
+        color: #1e293b;
+    }
+
+    .stat-card.difficulty-easy .stat-value {
+        color: #10b981;
+    }
+
+    .stat-card.difficulty-normal .stat-value {
+        color: #3b82f6;
+    }
+
+    .stat-card.difficulty-hard .stat-value {
+        color: #ef4444;
+    }
+
+    .distribution-section {
+        padding: 0 32px 40px 32px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 500;
+        margin: 0 0 20px 0;
+        color: #334155;
+    }
+
+    .distribution-bars {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .bar-item {
+        width: 100%;
+    }
+
+    .bar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+    }
+
+    .bar-label {
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .bar-label.easy {
+        color: #10b981;
+    }
+
+    .bar-label.normal {
+        color: #3b82f6;
+    }
+
+    .bar-label.hard {
+        color: #ef4444;
+    }
+
+    .bar-percent {
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .bar-track {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .bar-fill {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 0.5s ease;
+    }
+
+    .bar-fill.easy {
+        background: #10b981;
+    }
+
+    .bar-fill.normal {
+        background: #3b82f6;
+    }
+
+    .bar-fill.hard {
+        background: #ef4444;
+    }
+
+    .profile-error {
+        text-align: center;
+        padding: 80px 20px;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .error-icon {
+        font-size: 72px;
+        margin-bottom: 20px;
+        color: #94a3b8;
+    }
+
+    .profile-error h3 {
+        font-size: 24px;
+        color: #1e293b;
+        margin-bottom: 12px;
+    }
+
+    .profile-error p {
+        color: #64748b;
+        margin-bottom: 24px;
+    }
+
+    .btn-back {
+        padding: 10px 28px;
+        background: #6366f1;
+        color: white;
+        border: none;
+        border-radius: 40px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background 0.2s;
+    }
+
+    .btn-back:hover {
+        background: #4f46e5;
+    }
+
+    .profile-skeleton {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+
+    .skeleton-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        margin-bottom: 24px;
+    }
+
+    .skeleton-line {
+        height: 20px;
+        background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 8px;
+        margin-bottom: 12px;
+    }
+
+    .skeleton-line.short {
+        width: 40%;
+    }
+
+</style>
 
 @code {
     [Parameter] public Guid UserId { get; set; }
@@ -86,5 +469,22 @@ else
     private void GoToEdit()
     {
         Nav.NavigateTo("/settings/profile");
+    }
+
+    private string GetInitials(string? name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return "U";
+            
+        var parts = name.Split(' ');
+        if (parts.Length >= 2)
+            return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+        return name.Length > 0 ? name[0].ToString().ToUpper() : "U";
+    }
+
+    private int GetPercentage(int count, int total)
+    {
+        if (total == 0) return 0;
+        return (int)Math.Round((double)count / total * 100);
     }
 }
