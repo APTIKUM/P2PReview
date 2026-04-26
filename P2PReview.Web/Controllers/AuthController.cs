@@ -28,17 +28,4 @@ public class AuthController : ControllerBase
 
         return Redirect($"/profile/{userIdClaim}");
     }
-
-    [HttpPost("register")]
-    public async Task<IActionResult> Register([FromBody] RegisterCommand command)
-    {
-        var response = await _authService.RegisterAsync(command);
-
-        if (!response.Success)
-        {
-            return BadRequest(response.Errors);
-        }
-
-        return Ok();
-    }
 }

@@ -27,6 +27,7 @@ builder.Services
 
 builder.Services.ConfigureApplicationCookie(options =>
 {
+    options.ExpireTimeSpan = TimeSpan.FromDays(7);
     options.LoginPath = "/login";
 
 });

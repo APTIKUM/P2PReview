@@ -2,12 +2,15 @@
 @rendermode InteractiveServer
 
 @using Microsoft.AspNetCore.Identity
+@using P2PReview.Application.Auth.Commands
+@using P2PReview.Application.Interfaces
 @using P2PReview.Domain.Entities
 @using Shared.Layout
 @using System.ComponentModel.DataAnnotations
 
 @inject NavigationManager Nav
 @inject HttpClient Http
+@inject IAuthService AuthService
 
 @layout AuthLayout
 
@@ -71,7 +74,7 @@
                     <InputText class="form-control"
                                type="@(showConfirmPassword ? "text" : "password")"
                                @bind-Value="registerModel.ConfirmPassword"
-                               placeholder="Повторите пароль" />
+                               placeholder="Повторите пароль"/>
 
                     <button type="button"
                             class="password-toggle"
@@ -93,14 +96,22 @@
             <!-- SERVER ERROR -->
             @if (!string.IsNullOrWhiteSpace(errorMessage))
             {
-                <div class="validation-message" style="margin: 10px 0;">
+                <div class="validation-message" style="margin-bottom: 10px;">
                     @errorMessage
                 </div>
             }
 
             <!-- SUBMIT -->
             <button type="submit" class="btn btn-primary btn-login">
-                Создать аккаунт
+                @if (isLoading)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                    <span>Регистрация...</span>
+                }
+                else
+                {
+                    <span>Создать аккаунт</span>
+                }
             </button>
 
         </EditForm>
@@ -119,10 +130,12 @@
 
 @code {
     private RegisterModel registerModel = new();
-    private string errorMessage;
+    private string? errorMessage;
 
     private bool showPassword;
     private bool showConfirmPassword;
+
+    private bool isLoading;
 
     private void TogglePassword()
         => showPassword = !showPassword;
@@ -132,28 +145,43 @@
 
     private async Task HandleRegister()
     {
-        errorMessage = "";
-
-        if (registerModel.Password != registerModel.ConfirmPassword)
+        if (isLoading)
         {
-            errorMessage = "Пароли не совпадают";
             return;
         }
 
-        var response = await Http.PostAsJsonAsync("api/auth/register", new
+        errorMessage = null;
+        isLoading = true;
+        
+        try
         {
-            Email = registerModel.Email,
-            Password = registerModel.Password
-        });
+            if (registerModel.Password != registerModel.ConfirmPassword)
+            {
+                errorMessage = "Пароли не совпадают";
+                return;
+            }
 
-        if (response.IsSuccessStatusCode)
-        {
-            Nav.NavigateTo("/login", forceLoad: true);
+            var registerCommand = new RegisterCommand()
+                {
+                    Email = registerModel.Email,
+                    Password = registerModel.Password
+                };
+
+            var result = await AuthService.RegisterAsync(registerCommand);
+
+            if (result.Success)
+            {
+                Nav.NavigateTo("/login", forceLoad: true);
+                return;
+            }
+
+            errorMessage = string.Join("\n", result.Errors);
         }
-        else
+        finally
         {
-            errorMessage = await response.Content.ReadAsStringAsync();
+            isLoading = false;
         }
+
     }
 
     public class RegisterModel
@@ -164,6 +192,8 @@
 
         [Required(ErrorMessage = "Введите пароль")]
         [MinLength(8, ErrorMessage = "Минимум 8 символов")]
+        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[\W_]).+$", 
+        ErrorMessage = "Пароль должен содержать строчные, заглавные буквы, цифру и спецсимвол")]
         public string Password { get; set; } = "";
 
         [Required(ErrorMessage = "Повторите пароль")]
