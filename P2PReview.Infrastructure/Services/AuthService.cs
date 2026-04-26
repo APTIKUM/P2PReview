@@ -47,7 +47,7 @@ namespace P2PReview.Infrastructure.Services
 
             var user = new User
             {
-                UserName = registerCommand.Email,
+                UserName = registerCommand.Email[..Math.Min(5, registerCommand.Email.IndexOf('@'))],
                 Email = registerCommand.Email,
                 CreatedAt = DateTime.UtcNow,
             };
