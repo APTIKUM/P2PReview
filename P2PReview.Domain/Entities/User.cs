@@ -11,5 +11,7 @@ namespace P2PReview.Domain.Entities
         public int ReviewsNormal {  get; set; }
         public int ReviewsHard {  get; set; }
 
+        public string? AvatarId { get; set; }
+
     }
 }

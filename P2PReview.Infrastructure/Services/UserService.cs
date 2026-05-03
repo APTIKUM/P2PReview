@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using P2PReview.Application.Interfaces;
-using P2PReview.Application.User.DTOs;
+using P2PReview.Application.Users.DTOs;
 using P2PReview.Domain.Entities;
 using System.Security.Claims;
 
@@ -17,6 +17,18 @@ namespace P2PReview.Infrastructure.Services
         {
             _userManager = userManager;
             _authStateProvider = authenticationState;
+        }
+
+        public async Task<UserProfileDto?> GetAuthProfileAsync()
+        {
+            var authId = await GetAuthUserId();
+
+            if (authId == null)
+            {
+                return null;
+            }
+
+            return await GetUserProfileAsync((Guid)authId);
         }
 
         public async Task<Guid?> GetAuthUserId()
@@ -41,13 +53,27 @@ namespace P2PReview.Infrastructure.Services
 
             var authUserId = await GetAuthUserId();
 
-            return new UserProfileDto()
+            return new UserProfileDto(user)
             {
-                Id = user.Id,
-                UserName = user.UserName,
-                QualityScore = user.QualityScore,
                 IsOwnProfile = userId == authUserId
             };
+        }
+
+        public async Task<UserProfileDto> UpdateUserProfileAsync(Guid userId, UpdateUserProfileDto updateUserProfileDto)
+        {
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            user.UserName = updateUserProfileDto.UserName ?? user.UserName;
+            user.AvatarId = updateUserProfileDto.AvatarId ?? user.AvatarId;
+
+            await _userManager.UpdateAsync(user);
+
+            return new UserProfileDto(user);
         }
     }
 }

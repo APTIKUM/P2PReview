@@ -1,95 +1,71 @@
-﻿@inherits LayoutComponentBase
+﻿@using P2PReview.Application.Interfaces
+@using P2PReview.Web.Components.Icons
+@using P2PReview.Application.Users.DTOs
+@using P2PReview.Web.Services
+@using P2PReview.Web.State
+
+@inherits LayoutComponentBase
+
 @inject NavigationManager Navigation
+@inject UserContext UserContext
+@inject AvatarUrlProvider AvatarUrlProvider
+
+@implements IDisposable
 
 <div class="app">
     <header class="top-bar">
         <div class="top-bar-content">
+            
             <div class="logo">
-                <a href="/" style="color : white;">
-                    <i class="fa-solid fa-code-compare"></i>
-                    P2P Review
+                <a href="/">
+                    <CodeBubbleIcon />
+                    <span>P2P Review</span>
                 </a>
             </div>
 
-            <!-- Правая часть: ссылки -->
             <div class="top-bar-links">
+
                 <div class="notifications-icon">
                     <i class="fa-regular fa-bell"></i>
-                    <span class="badge">3</span>
+                    @* <span class="badge">0</span> *@
                 </div>
+
                 <a href="/profile" class="top-link">
-                    <i class="fa-regular fa-user"></i>
-                    Профиль
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>@(UserContext.Profile?.QualityScore ?? 0)</span>
                 </a>
 
+                <a href="/profile" class="top-link">
+                    <img class="avatar-topbar"
+                         src="@AvatarUrlProvider.GetAvatarUrl(UserContext.Profile?.AvatarId)" />
+                </a>
             </div>
+
         </div>
     </header>
 
-    <!-- Основной контент -->
     <main class="content">
         @Body
     </main>
 </div>
 
-<style>
-    /* Временные стили прямо здесь, потом вынесем */
-    .app {
-        min-height: 100vh;
-        background: #f5f5f5;
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        UserContext.OnChange -= HandleUserChanged;
+        UserContext.OnChange += HandleUserChanged;
+
+        await UserContext.InitializeAsync();
     }
 
-    .top-bar {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 12px 0;
-        position: sticky;
-        top: 0;
-        z-index: 100;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    private void HandleUserChanged()
+    {
+        InvokeAsync(StateHasChanged);
     }
 
-    .top-bar-content {
-        max-width: 100%;
-        margin: 0 auto;
-        padding: 0 20px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    public void Dispose()
+    {
+        UserContext.OnChange -= HandleUserChanged;
     }
-    .logo {
-        font-size: 20px;
-        font-weight: bold;
-        cursor: pointer;
-    }
-    .top-bar-links {
-        display: flex;
-        gap: 20px;
-        align-items: center;
-    }
-    .top-link {
-        color: white;
-        text-decoration: none;
-        padding: 5px 10px;
-    }
-    .notifications-icon {
-        position: relative;
-        cursor: pointer;
-        font-size: 20px;
-    }
-    .badge {
-        position: absolute;
-        top: -8px;
-        right: -12px;
-        background: #e74c3c;
-        color: white;
-        border-radius: 50%;
-        padding: 2px 6px;
-        font-size: 11px;
-        font-weight: bold;
-    }
-    .content {
-        margin: 20px auto;
-        padding: 0 20px;
-    }
-</style>
+}

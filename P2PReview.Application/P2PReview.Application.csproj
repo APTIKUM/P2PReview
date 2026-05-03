@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Components.Web" Version="10.0.7" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
     <PackageReference Include="System.Security.Cryptography.Xml" Version="10.0.7" />
   </ItemGroup>
 
@@ -15,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="User\Queries\" />
+    <Folder Include="Users\Queries\" />
   </ItemGroup>
 
 </Project>

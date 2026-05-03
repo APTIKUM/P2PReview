@@ -6,6 +6,8 @@ using P2PReview.Domain.Entities;
 using P2PReview.Infrastructure;
 using P2PReview.Infrastructure.Services;
 using P2PReview.Web.Components;
+using P2PReview.Web.Services;
+using P2PReview.Web.State;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +36,11 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<IFileService, FileService>();
+
+builder.Services.AddScoped<UserContext>();
+
+builder.Services.AddSingleton<AvatarUrlProvider>();
 
 builder.Services.AddControllers();
 

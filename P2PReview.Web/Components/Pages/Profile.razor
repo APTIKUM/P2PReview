@@ -2,7 +2,7 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.Authorization
 @using P2PReview.Application.Interfaces
-@using P2PReview.Application.User.DTOs
+@using P2PReview.Application.Users.DTOs
 @using System.Security.Claims
 
 @rendermode InteractiveServer
@@ -37,9 +37,9 @@ else
             <!-- Avatar and Header -->
             <div class="profile-header">
                 <div class="avatar-wrapper">
-                    @if (!string.IsNullOrEmpty(profile.AvatarUrl))
+                    @if (!string.IsNullOrEmpty(profile.AvatarId))
                     {
-                        <img src="@profile.AvatarUrl" class="avatar" />
+                        <img src="@GetAvatarUrl(profile.AvatarId)" class="avatar" />
                     }
                     else
                     {
@@ -486,5 +486,13 @@ else
     {
         if (total == 0) return 0;
         return (int)Math.Round((double)count / total * 100);
+    }
+
+    private string GetAvatarUrl(string? avatarId)
+    {
+        if (string.IsNullOrWhiteSpace(avatarId))
+            return string.Empty;
+
+        return $"/uploads/avatars/{avatarId}";
     }
 }

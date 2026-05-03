@@ -1,0 +1,40 @@
+﻿<svg width="@Size"
+     height="@Size"
+     viewBox="10 5 100 90"
+     fill="none"
+     xmlns="http://www.w3.org/2000/svg"
+     style="color:@Color">
+
+    <!-- Bubble -->
+    <path d="M20 20C20 14.4772 24.4772 10 30 10H90C95.5228 10 100 14.4772 100 20V60C100 65.5228 95.5228 70 90 70H55L35 90V70H30C24.4772 70 20 65.5228 20 60V20Z"
+          stroke="currentColor"
+          stroke-width="@StrokeBubble"
+          fill="none"
+          stroke-linejoin="round" />
+
+    <!-- Code symbols -->
+    <path d="M45 31L35 41L45 51"
+          stroke="currentColor"
+          stroke-width="@StrokeCode"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+
+    <path d="M75 31L85 41L75 51"
+          stroke="currentColor"
+          stroke-width="@StrokeCode"
+          stroke-linecap="round"
+          stroke-linejoin="round" />
+
+    <line x1="65" y1="31" x2="55" y2="51"
+          stroke="currentColor"
+          stroke-width="@StrokeCode"
+          stroke-linecap="round" />
+
+</svg>
+
+@code {
+    [Parameter] public int Size { get; set; } = 35;
+    [Parameter] public int StrokeCode { get; set; } = 6;
+    [Parameter] public int StrokeBubble { get; set; } = 8;
+    [Parameter] public string Color { get; set; } = "white";
+}
