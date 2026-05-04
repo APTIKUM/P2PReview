@@ -6,6 +6,7 @@ namespace P2PReview.Application.Users.DTOs
     {
         public string Id { get; set; } = null!;
         public string? UserName { get; set; } = null;
+        public string? Email { get; set; } = null;
         public string? AvatarId { get; set; } = null;
         public int QualityScore { get; set; }
         public bool IsOwnProfile { get; set; } = false;
@@ -32,6 +33,7 @@ namespace P2PReview.Application.Users.DTOs
             ReviewsNormal = user.ReviewsNormal;
             GitHubUrl = user.GitHubUrl;
             GitLabUrl = user.GitLabUrl;
+            Email = user.Email;
         }
 
         public UserProfileDto()

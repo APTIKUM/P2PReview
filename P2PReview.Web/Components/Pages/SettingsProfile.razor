@@ -5,6 +5,8 @@
 @using System.ComponentModel.DataAnnotations
 @using P2PReview.Application.Interfaces
 @using P2PReview.Application.Users.DTOs
+@using P2PReview.Web.Services
+@using P2PReview.Web.State
 
 @rendermode InteractiveServer
 @attribute [Authorize]
@@ -12,189 +14,109 @@
 @inject IUserService UserService
 @inject IFileService FileService
 @inject NavigationManager Nav
+@inject UserContext UserContext
+@inject AvatarUrlProvider AvatarUrlProvider
 
-<h3 class="page-title">Редактирование профиля</h3>
-
-@if (isLoading)
+@if (UserContext.Profile == null)
 {
     <p>Загрузка...</p>
 }
 else
 {
-    <div class="edit-container">
-        <div class="edit-card">
+    <div class="container">
+        <div class="form">
+            <div class="card">
 
-            <!-- Avatar -->
-            <div class="avatar-section">
+                <!-- Avatar -->
+                <div class="avatar-block">
+    
+                    <div class="group">
+                        <label>Аватар</label>
+                        <div class="avatar-hint">.png, .jpg, до 5 мб</div>
+                    </div>
+    
+                    <label class="avatar-upload">
+                        <img src="@previewUrl" class="avatar-img" />
+                        <InputFile OnChange="OnAvatarSelected"
+                                   accept=".jpg,.jpeg,.png,image/jpeg,image/png"
+                                   hidden />
+                    </label>
+    
+                </div>
 
-                <label class="avatar-wrapper">
+                <!-- Form -->
+                <EditForm Model="model" OnValidSubmit="Save">
+                    <DataAnnotationsValidator />
 
-                    @if (!string.IsNullOrWhiteSpace(previewUrl))
-                    {
-                        <img src="@previewUrl" class="avatar" />
-                    }
-                    else
-                    {
-                        <div class="avatar-placeholder">
-                            @GetInitials(model.UserName)
-                        </div>
-                    }
-
-                    <div class="avatar-overlay">
-                        <span>Изменить</span>
+                    <div class="group">
+                        <label>Имя пользователя</label>
+                        <InputText class="input-field"
+                                   placeholder="Введите имя пользователя"
+                                   @bind-Value="model.UserName" />
+                        <ValidationMessage For="@(() => model.UserName)" />
                     </div>
 
-                    <InputFile OnChange="OnAvatarSelected"
-                               accept="image/*"
-                               class="avatar-input" />
+                    <div class="group">
+                        <label>Ссылки на профили</label>
+                        <div class="input-with-icon">
+                            <i class="fa-brands fa-github" style="color:#24292e"></i>
+                            <InputText
+                                       @bind-Value="model.GitHubUrl"
+                                       placeholder="Ссылка на ваш GitHub" />
+                        </div>
+                        <ValidationMessage For="@(() => model.GitHubUrl)" />
 
-                </label>
+                        <div class="input-with-icon">
+                            <i class="fa-brands fa-gitlab" style="color:darkorange"></i>
+                            <InputText
+                                       @bind-Value="model.GitLabUrl"
+                                       placeholder="Ссылка на ваш GitLab" />
+                        </div>
+                        <ValidationMessage For="@(() => model.GitLabUrl)" />
+                    </div>
+
+                    <div class="actions">
+                        <button type="submit" class="save">
+                            Сохранить
+                        </button>
+
+                        <button type="button"
+                                class="cancel"
+                                @onclick="Cancel">
+                            Отмена
+                        </button>
+                    </div>
+
+                </EditForm>
 
             </div>
-
-            <!-- Form -->
-            <EditForm Model="model" OnValidSubmit="Save">
-                <DataAnnotationsValidator />
-
-                <div class="form-group">
-                    <label>Имя пользователя</label>
-                    <InputText class="input" @bind-Value="model.UserName" />
-                    <ValidationMessage For="@(() => model.UserName)" />
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn-save">Сохранить</button>
-                    <button type="button" class="btn-cancel" @onclick="Cancel">Отмена</button>
-                </div>
-            </EditForm>
-
         </div>
     </div>
-
-
-    <style>
-        .edit-container {
-            display: flex;
-            justify-content: center;
-            padding-top: 40px;
-        }
-
-        .edit-card {
-            width: 420px;
-            background: #fff;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        }
-
-        .avatar-section {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-
-        .avatar-wrapper {
-            position: relative;
-            width: 120px;
-            height: 120px;
-            cursor: pointer;
-        }
-
-        .avatar {
-            width: 120px;
-            height: 120px;
-            object-fit: cover;
-            border-radius: 8px; /* квадрат */
-            border: 2px solid #e5e5e5;
-            transition: 0.2s ease;
-        }
-
-        .avatar-placeholder {
-            width: 120px;
-            height: 120px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f3f4f6;
-            border-radius: 8px;
-            font-size: 28px;
-            font-weight: 600;
-            color: #555;
-            border: 2px dashed #ccc;
-        }
-
-        .avatar-wrapper:hover .avatar,
-        .avatar-wrapper:hover .avatar-placeholder {
-            filter: brightness(0.85);
-        }
-
-        .avatar-overlay {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,0.35);
-            color: white;
-            font-size: 14px;
-            opacity: 0;
-            transition: 0.2s ease;
-            border-radius: 8px;
-        }
-
-        .avatar-wrapper:hover .avatar-overlay {
-            opacity: 1;
-        }
-
-        .avatar-input {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            cursor: pointer;
-        }
-    </style>
-
 }
 
 @code {
     private EditUserProfileModel model = new();
-    private bool isLoading = true;
-
-    private Guid userId;
-
     private IBrowserFile? avatarFile;
-    private string? avatarFileName;
     private string? previewUrl;
 
     protected override async Task OnInitializedAsync()
     {
-        var profile = await UserService.GetAuthProfileAsync();
-        var id = await UserService.GetAuthUserId();
+        await UserContext.InitializeAsync();
 
-        if (id is null)
-            return;
+        model.UserName = UserContext.Profile?.UserName ?? "";
+        model.GitHubUrl = UserContext.Profile?.GitHubUrl ?? "";
+        model.GitLabUrl = UserContext.Profile?.GitLabUrl ?? "";
 
-        userId = id.Value;
-
-        model.UserName = profile?.UserName ?? "";
-
-        avatarFileName = profile?.AvatarId;
-
-        if (!string.IsNullOrWhiteSpace(avatarFileName))
-        {
-            previewUrl = $"/uploads/avatars/{avatarFileName}";
-        }
-
-        isLoading = false;
+        previewUrl = AvatarUrlProvider.GetAvatarUrl(UserContext.Profile?.AvatarId);
     }
 
     private async Task OnAvatarSelected(InputFileChangeEventArgs e)
     {
         avatarFile = e.File;
 
-        // preview (base64)
-        using var stream = avatarFile.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+        using var stream = avatarFile.OpenReadStream(5 * 1024 * 1024);
         using var ms = new MemoryStream();
+
         await stream.CopyToAsync(ms);
 
         previewUrl = $"data:{avatarFile.ContentType};base64,{Convert.ToBase64String(ms.ToArray())}";
@@ -202,20 +124,25 @@ else
 
     private async Task Save()
     {
-        string? avatarId = avatarFileName;
+        if (UserContext.Profile == null)
+            return;
 
-        if (avatarFile is not null)
+        string? avatarId = UserContext.Profile.AvatarId;
+
+        if (avatarFile != null)
         {
-            // 1. загружаем файл через FileService
             avatarId = await FileService.UploadAvatarAsync(avatarFile);
         }
 
-        // 2. обновляем пользователя
-        await UserService.UpdateUserProfileAsync(userId, new UpdateUserProfileDto
+        await UserService.UpdateUserProfileAsync(UserContext.Profile.Id, new UpdateUserProfileDto
         {
             UserName = model.UserName,
-            AvatarId = avatarId
+            AvatarId = avatarId,
+            GitHubUrl = model.GitHubUrl,
+            GitLabUrl = model.GitLabUrl
         });
+
+        await UserContext.RefreshAsync();
 
         Nav.NavigateTo("/profile");
     }
@@ -225,22 +152,15 @@ else
         Nav.NavigateTo("/profile");
     }
 
-    private string GetInitials(string? name)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-            return "U";
-
-        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-
-        return parts.Length >= 2
-            ? $"{parts[0][0]}{parts[1][0]}".ToUpper()
-            : name[0].ToString().ToUpper();
-    }
-
     public class EditUserProfileModel
     {
-        [Required]
+        [Required(ErrorMessage = "Обязательно для заполнения")]
         public string UserName { get; set; } = string.Empty;
+
+        // [Url]
+        public string? GitHubUrl { get; set; }
+
+        // [Url]
+        public string? GitLabUrl { get; set; }
     }
 }
-

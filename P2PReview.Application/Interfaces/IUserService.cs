@@ -8,6 +8,6 @@ namespace P2PReview.Application.Interfaces
         public Task<UserProfileDto?> GetAuthProfileAsync();
         public Task<Guid?> GetAuthUserId();
 
-        public Task<UserProfileDto> UpdateUserProfileAsync(Guid userId, UpdateUserProfileDto updateUserProfileDto);
+        public Task<UserProfileDto> UpdateUserProfileAsync(string userId, UpdateUserProfileDto updateUserProfileDto);
     }
 }
