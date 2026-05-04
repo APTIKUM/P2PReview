@@ -33,10 +33,11 @@ else
                     <div class="group">
                         <label>Аватар</label>
                         <div class="avatar-hint">.png, .jpg, до 5 mb</div>
+                        
                     </div>
     
                     <label class="avatar-upload">
-                        <img src="@previewUrl" class="avatar-img" />
+                        <img src="@previewAvatarUrl" class="avatar-img" />
                         <InputFile OnChange="OnAvatarSelected"
                                    accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                                    hidden />
@@ -104,8 +105,8 @@ else
 
 @code {
     private EditUserProfileModel model = new();
-    private IBrowserFile? avatarFile;
-    private string? previewUrl;
+    private IBrowserFile? avatarFile = null;
+    private string? previewAvatarUrl;
 
     protected override async Task OnInitializedAsync()
     {
@@ -115,7 +116,7 @@ else
         model.GitHubUrl = UserContext.Profile?.GitHubUrl ?? "";
         model.GitLabUrl = UserContext.Profile?.GitLabUrl ?? "";
 
-        previewUrl = AvatarUrlProvider.GetAvatarUrl(UserContext.Profile?.AvatarId);
+        previewAvatarUrl = AvatarUrlProvider.GetAvatarUrl(UserContext.Profile?.AvatarId);
     }
 
     private async Task OnAvatarSelected(InputFileChangeEventArgs e)
@@ -127,25 +128,28 @@ else
 
         await stream.CopyToAsync(ms);
 
-        previewUrl = $"data:{avatarFile.ContentType};base64,{Convert.ToBase64String(ms.ToArray())}";
+        previewAvatarUrl = $"data:{avatarFile.ContentType};base64,{Convert.ToBase64String(ms.ToArray())}";
     }
 
     private async Task Save()
     {
         if (UserContext.Profile == null)
-            return;
+        {
+            return;    
+        }
 
-        string? avatarId = UserContext.Profile.AvatarId;
+        string? newAvatarId = null;
 
         if (avatarFile != null)
         {
-            avatarId = await FileService.UploadAvatarAsync(avatarFile);
+            newAvatarId = await FileService.UploadAvatarAsync(avatarFile);
+            await FileService.DeleteAvatarAsync(UserContext.Profile.AvatarId);
         }
 
         await UserService.UpdateUserProfileAsync(UserContext.Profile.Id, new UpdateUserProfileDto
         {
             UserName = model.UserName,
-            AvatarId = avatarId,
+            AvatarId = newAvatarId,
             GitHubUrl = model.GitHubUrl,
             GitLabUrl = model.GitLabUrl
         });

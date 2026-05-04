@@ -5,5 +5,6 @@ namespace P2PReview.Application.Interfaces
     public interface IFileService
     {
         public Task<string> UploadAvatarAsync(IBrowserFile file);
+        public Task<bool> DeleteAvatarAsync(string avatarId);
     }
 }

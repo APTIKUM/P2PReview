@@ -30,11 +30,14 @@
 
     .avatar-block .group {
         margin-bottom: 0px;
+        display: flex;
+        flex-direction: row;
     }
 
 .avatar-hint {
     font-size: 14px;
     color: #6F8296;
+    margin-block: auto;
 }
 
 .avatar-upload {
@@ -79,7 +82,7 @@
     border: 2px solid #ddd;
     font-size: 16px;
     transition: 0.2s;
-    font-family: 'Inter', sans-serif; 
+    font-family: 'Inter', sans-serif;
 }
 
     ::deep input.input-field:focus {

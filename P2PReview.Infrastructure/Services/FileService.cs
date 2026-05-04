@@ -7,6 +7,7 @@ namespace P2PReview.Infrastructure.Services
     public class FileService : IFileService
     {
         private readonly IWebHostEnvironment _env;
+        private readonly string _uploadsAvatarsPath;
 
         private const long MaxFileSize = 5 * 1024 * 1024;
 
@@ -21,6 +22,13 @@ namespace P2PReview.Infrastructure.Services
         public FileService(IWebHostEnvironment env)
         {
             _env = env;
+
+            _uploadsAvatarsPath = Path.Combine(_env.WebRootPath, "uploads", "avatars");
+
+            if (!Directory.Exists(_uploadsAvatarsPath))
+            {
+                Directory.CreateDirectory(_uploadsAvatarsPath);
+            }
         }
 
         public async Task<string> UploadAvatarAsync(IBrowserFile file)
@@ -42,19 +50,35 @@ namespace P2PReview.Infrastructure.Services
                     $"Invalid file type. Allowed: {string.Join(" ", AllowedExtensions)}");
             }
 
-            var uploadsFolder = Path.Combine(_env.WebRootPath, "uploads", "avatars");
-
-            if (!Directory.Exists(uploadsFolder))
-                Directory.CreateDirectory(uploadsFolder);
-
             var fileName = $"{Guid.NewGuid()}{extension}";
-            var filePath = Path.Combine(uploadsFolder, fileName);
+            var filePath = Path.Combine(_uploadsAvatarsPath, fileName);
 
             await using var stream = new FileStream(filePath, FileMode.Create);
 
             await file.OpenReadStream(MaxFileSize).CopyToAsync(stream);
 
             return fileName;
+        }
+
+        public async Task<bool> DeleteAvatarAsync(string fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName))
+            {
+                return false;
+            }
+
+            var filePath = Path.Combine(_uploadsAvatarsPath, fileName);
+
+            var fullPath = Path.GetFullPath(filePath);
+
+            if (!File.Exists(fullPath))
+            {
+                return false;
+            }
+
+            await Task.Run(() => File.Delete(fullPath));
+
+            return true;
         }
     }
 }
