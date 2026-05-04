@@ -32,12 +32,6 @@
         margin-bottom: 0px;
     }
 
-.avatar-text {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
 .avatar-hint {
     font-size: 14px;
     color: #6F8296;
@@ -77,60 +71,73 @@
         color: #323E5A;
     }
 
-    .group .input-field input {
-        color: red;
-        width: 100%;
-        padding: 10px 12px;
-        border-radius: 8px;
-        border: 1px solid #ddd;
-        font-size: 14px;
-        transition: 0.2s;
+::deep input.input-field {
+    color: #323E5A;
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+    font-size: 16px;
+    transition: 0.2s;
+    font-family: 'Inter', sans-serif; 
+}
+
+    ::deep input.input-field:focus {
+        outline: none;
+        border: 2px solid #6c7cff;
     }
 
-        .group .input-field input:focus {
-            outline: none;
-            border-color: #6c7cff;
-        }
+.input-with-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
 
-    .group .input-with-icon {
-        position: relative;
-        display: flex;
-        align-items: center;
+    .input-with-icon i {
+        position: absolute;
+        left: 12px;
+        z-index: 1;
     }
 
-        .group .input-with-icon i {
-            position: absolute;
-            left: 12px;
-            z-index: 1;
-        }
+    .input-with-icon ::deep input.input-field {
+        padding-left: 35px;
+    }
 
 /* Buttons */
 
 .actions {
     display: flex;
     gap: 10px;
-    margin-top: 20px;
+    margin-top: 30px;
 }
 
 .btn-save {
     flex: 1;
     padding: 12px;
-    background: #6c7cff;
+    background: #808FEA;
     color: white;
     border: none;
     border-radius: 10px;
     cursor: pointer;
+    font-family: 'Inter', sans-serif;
 }
 
     .btn-save:hover {
-        background: #5a67e6;
+        background: #6C7CDA;
     }
 
 .btn-cancel {
     flex: 1;
     padding: 12px;
-    background: #f1f3f7;
+    background: white;
     border: none;
     border-radius: 10px;
+    border: 2px #808FEA solid;
     cursor: pointer;
+    color: #808FEA;
+    font-family: 'Inter', sans-serif;
 }
+
+    .btn-cancel:hover {
+        background: #f1f3f7;
+    }

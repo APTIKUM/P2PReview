@@ -49,7 +49,7 @@
     z-index: 1;
 }
 
-.input-with-icon input {
+.form-control {
     width: 100%;
     padding: 12px 12px 12px 40px;
     border: 2px solid #e2e8f0;
@@ -58,11 +58,20 @@
     transition: all 0.2s;
 }
 
-.input-with-icon input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+.input-with-icon ::deep input {
+    width: 100%;
+    padding: 12px 12px 12px 40px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: all 0.2s;
 }
+
+    .input-with-icon ::deep input:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
 
 .password-toggle {
     position: absolute;
@@ -74,9 +83,9 @@
     padding: 4px;
 }
 
-.password-toggle:hover {
-    color: #667eea;
-}
+    .password-toggle:hover {
+        color: #667eea;
+    }
 
 .password-hints {
     display: flex;
@@ -85,18 +94,18 @@
     font-size: 12px;
 }
 
-.password-hints span {
-    color: #a0aec0;
-}
+    .password-hints span {
+        color: #a0aec0;
+    }
 
 .forgot-link {
     color: #667eea;
     text-decoration: none;
 }
 
-.forgot-link:hover {
-    text-decoration: underline;
-}
+    .forgot-link:hover {
+        text-decoration: underline;
+    }
 
 .btn-login {
     width: 100%;
@@ -111,10 +120,10 @@
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.btn-login:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
-}
+    .btn-login:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
 
 .divider {
     display: flex;
@@ -124,17 +133,17 @@
     font-size: 14px;
 }
 
-.divider::before,
-.divider::after {
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: #e2e8f0;
-}
+    .divider::before,
+    .divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e2e8f0;
+    }
 
-.divider span {
-    padding: 0 16px;
-}
+    .divider span {
+        padding: 0 16px;
+    }
 
 .oauth-buttons {
     display: flex;
@@ -158,15 +167,15 @@
     transition: all 0.2s;
 }
 
-.btn-oauth:hover {
-    border-color: #667eea;
-    background: #f7fafc;
-    transform: translateY(-1px);
-}
+    .btn-oauth:hover {
+        border-color: #667eea;
+        background: #f7fafc;
+        transform: translateY(-1px);
+    }
 
-.btn-oauth i {
-    font-size: 18px;
-}
+    .btn-oauth i {
+        font-size: 18px;
+    }
 
 .register-link {
     text-align: center;
@@ -175,12 +184,12 @@
     font-size: 14px;
 }
 
-.register-link a {
-    color: #667eea;
-    text-decoration: none;
-    font-weight: 600;
-}
+    .register-link a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+    }
 
-.register-link a:hover {
-    text-decoration: underline;
-}
+        .register-link a:hover {
+            text-decoration: underline;
+        }

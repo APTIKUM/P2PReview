@@ -32,7 +32,7 @@ else
     
                     <div class="group">
                         <label>Аватар</label>
-                        <div class="avatar-hint">.png, .jpg, до 5 мб</div>
+                        <div class="avatar-hint">.png, .jpg, до 5 mb</div>
                     </div>
     
                     <label class="avatar-upload">
@@ -49,6 +49,14 @@ else
                     <DataAnnotationsValidator />
 
                     <div class="group">
+                        <label>Email</label>
+                        <InputText class="input-field"
+                                   disabled
+                                   @bind-Value="@UserContext.Profile.Email" />
+                        <ValidationMessage For="@(() => model.UserName)" />
+                    </div>
+
+                    <div class="group">
                         <label>Имя пользователя</label>
                         <InputText class="input-field"
                                    placeholder="Введите имя пользователя"
@@ -60,7 +68,7 @@ else
                         <label>Ссылки на профили</label>
                         <div class="input-with-icon">
                             <i class="fa-brands fa-github" style="color:#24292e"></i>
-                            <InputText
+                            <InputText class="input-field"
                                        @bind-Value="model.GitHubUrl"
                                        placeholder="Ссылка на ваш GitHub" />
                         </div>
@@ -68,7 +76,7 @@ else
 
                         <div class="input-with-icon">
                             <i class="fa-brands fa-gitlab" style="color:darkorange"></i>
-                            <InputText
+                            <InputText class="input-field"
                                        @bind-Value="model.GitLabUrl"
                                        placeholder="Ссылка на ваш GitLab" />
                         </div>
@@ -76,12 +84,12 @@ else
                     </div>
 
                     <div class="actions">
-                        <button type="submit" class="save">
+                        <button type="submit" class="btn-save">
                             Сохранить
                         </button>
 
                         <button type="button"
-                                class="cancel"
+                                class="btn-cancel"
                                 @onclick="Cancel">
                             Отмена
                         </button>
@@ -157,10 +165,13 @@ else
         [Required(ErrorMessage = "Обязательно для заполнения")]
         public string UserName { get; set; } = string.Empty;
 
-        // [Url]
+        [RegularExpression(@"^https://github\.com/.*",
+        ErrorMessage = "Невалидный url")]
         public string? GitHubUrl { get; set; }
 
-        // [Url]
+        
+        [RegularExpression(@"^https://gitlab\.com/.*",
+        ErrorMessage = "Невалидный url")]
         public string? GitLabUrl { get; set; }
     }
 }

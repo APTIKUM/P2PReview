@@ -17,11 +17,11 @@ public class AuthController : ControllerBase
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromForm] LoginCommand command)
     {
-        var response = await _authService.LoginAsync(command);
+        var (Success, Errors) = await _authService.LoginAsync(command);
 
-        if (!response.Success)
+        if (!Success)
         {
-            return Redirect($"login?error={response.Errors}");
+            return Redirect($"/login?error=1");
         }
 
         var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);

@@ -70,6 +70,8 @@ namespace P2PReview.Infrastructure.Services
 
             user.UserName = updateUserProfileDto.UserName ?? user.UserName;
             user.AvatarId = updateUserProfileDto.AvatarId ?? user.AvatarId;
+            user.GitHubUrl = updateUserProfileDto.GitHubUrl ?? user.GitHubUrl;
+            user.GitLabUrl = updateUserProfileDto.GitLabUrl ?? user.GitLabUrl;
 
             await _userManager.UpdateAsync(user);
 
