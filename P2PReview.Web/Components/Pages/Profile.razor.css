@@ -173,6 +173,28 @@
     transition: 0.2s;
 }
 
+/* logout-icon */
+.logout-icon {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #323E5A;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+    .logout-icon:hover,
+    .edit-icon:hover {
+        transform: scale(1.03);
+        color: #808FEA;
+    }
+
 /* RIGHT */
 .profile-content {
     background: white;
