@@ -107,18 +107,68 @@
     <div class="profile-content">
 
         <div class="tabs">
-            <button class="active">Недавние ревью</button>
-            <button>Мои проекты</button>
+
+            <a class="@(activeTab == TubsEnum.Projects ? "active" : "")"
+                   href="@($"/profile/{UserId}?tab=projects")">
+                Мои проекты
+            </a>
+
+            <a class="@(activeTab == TubsEnum.Reviews ? "active" : "")"
+                   href="@($"/profile/{UserId}?tab=reviews")">
+                Недавние ревью
+            </a>
+
+            <a class="@(activeTab == TubsEnum.Friends ? "active" : "")"
+                   href="@($"/profile/{UserId}?tab=friends")">
+                Друзья
+            </a>
+
         </div>
 
-        <div class="reviews-list">
+        @if (activeTab == TubsEnum.Projects)
+        {
+            <div class="projects-list">
 
-            <!-- EMPTY STATE -->
-            <div class="empty-state">
-                пусто :(
+                @if (profile?.IsOwnProfile == true)
+                {
+                    <a class="new-project-btn " href="/projects/create">
+                        <i class="fa-solid fa-plus"></i>
+                    </a>
+                }
+
+                <div class="empty-state">
+                    Пусто :(
+                </div>
+
             </div>
+        }
 
-        </div>
+        @if (activeTab == TubsEnum.Reviews)
+        {
+            <div class="reviews-list">
+
+                <div class="empty-state">
+                    Пусто :(
+                </div>
+
+            </div>
+        }
+
+        @if (activeTab == TubsEnum.Friends)
+        {
+            <div class="friends-list">
+
+                <div class="empty-state">
+                    Пусто :(
+                </div>
+
+            </div>
+        }
+
+
+        
+
+
 
     </div> 
 
@@ -130,9 +180,40 @@
 
     private UserProfileDto? profile;
     private bool isLoading = true;
+    private TubsEnum activeTab = TubsEnum.Projects;
+
+    public enum TubsEnum
+    {
+        Projects,
+        Reviews,
+        Friends,
+    }
+
 
     protected override async Task OnParametersSetAsync()
     {
+        var uri = Nav.ToAbsoluteUri(Nav.Uri);
+
+        var query = Microsoft.AspNetCore.WebUtilities
+            .QueryHelpers
+            .ParseQuery(uri.Query);
+
+        if (query.TryGetValue("tab", out var tab))
+        {
+            if (Enum.TryParse<TubsEnum>(tab, true, out var parsed))
+            {
+                activeTab = parsed;
+            }
+            else
+            {
+                activeTab = TubsEnum.Projects;
+            }
+        }
+        else
+        {
+            activeTab = TubsEnum.Projects;
+        }
+
         await LoadProfile();
     }
 
@@ -174,7 +255,7 @@
         }
     }
 
-    private string GetGitUsername(string url)
+    private string? GetGitUsername(string url)
     {
         if (string.IsNullOrWhiteSpace(url))
             return null;
