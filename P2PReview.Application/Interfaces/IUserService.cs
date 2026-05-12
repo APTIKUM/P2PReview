@@ -1,4 +1,4 @@
-﻿using P2PReview.Application.Users.DTOs;
+﻿using P2PReview.Application.Users;
 
 namespace P2PReview.Application.Interfaces
 {

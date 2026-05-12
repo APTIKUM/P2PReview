@@ -16,8 +16,4 @@
     <ProjectReference Include="..\P2PReview.Domain\P2PReview.Domain.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Users\Queries\" />
-  </ItemGroup>
-
 </Project>

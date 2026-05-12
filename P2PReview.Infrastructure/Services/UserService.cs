@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using P2PReview.Application.Interfaces;
-using P2PReview.Application.Users.DTOs;
+using P2PReview.Application.Users;
 using P2PReview.Domain.Entities;
 using System.Security.Claims;
 

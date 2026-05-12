@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Hosting;
+using P2PReview.Application.Files;
 using P2PReview.Application.Interfaces;
 
 namespace P2PReview.Infrastructure.Services
@@ -79,6 +80,22 @@ namespace P2PReview.Infrastructure.Services
             await Task.Run(() => File.Delete(fullPath));
 
             return true;
+        }
+
+        public async Task<ReadedCodeFileDto> ReadCodeFileAsync(IBrowserFile file, CancellationToken ct = default)
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: MaxFileSize,
+                cancellationToken: ct);
+            
+            using var reader = new StreamReader(stream);
+
+            var content = await reader.ReadToEndAsync(ct);
+
+            return new ReadedCodeFileDto()
+            {
+                Name = file.Name,
+                Content = content
+            };
         }
     }
 }

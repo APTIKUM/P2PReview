@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Forms;
+using P2PReview.Application.Files;
 
 namespace P2PReview.Application.Interfaces
 {
@@ -6,5 +7,8 @@ namespace P2PReview.Application.Interfaces
     {
         public Task<string> UploadAvatarAsync(IBrowserFile file);
         public Task<bool> DeleteAvatarAsync(string avatarId);
+
+        public Task<ReadedCodeFileDto> ReadCodeFileAsync(IBrowserFile file,
+            CancellationToken ct = default);
     }
 }

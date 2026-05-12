@@ -1,13 +1,20 @@
 ﻿@page "/review/request/create"
 
 @using Microsoft.AspNetCore.Authorization
+@using P2PReview.Application.Files
+@using P2PReview.Application.Interfaces
+@using P2PReview.Application.ReviewRequests
+@using P2PReview.Domain.Enums
 @using P2PReview.Web.Components.Shared
+@using Microsoft.AspNetCore.Components.Forms
+@using P2PReview.Web.Extensions
 
 @rendermode InteractiveServer
 @attribute [Authorize]
 
 @inject IJSRuntime JS
 @inject NavigationManager Nav
+@inject IFileService FileService
 
 <div class="review-request-create-page">
 
@@ -57,27 +64,25 @@
         <div class="select-tabs">
 
             <button class="tab @(CurUploadMode == UploadMode.Manual ? "active" : "")"
-                    @onclick="() => SetMode(UploadMode.Manual)">
+                    @onclick="() => SetUploadCodeMode(UploadMode.Manual)">
                 Ручная загрузка
             </button>
 
             <button class="tab @(CurUploadMode == UploadMode.Paste ? "active" : "")"
-                    @onclick="() => SetMode(UploadMode.Paste)">
+                    @onclick="() => SetUploadCodeMode(UploadMode.Paste)">
                 Вставка кода
             </button>
 
-            @* <button class="tab @(CurUploadMode == UploadMode.Git ? "active" : "")"
-                    @onclick="() => SetMode(UploadMode.Git)">
+            <button class="tab @(CurUploadMode == UploadMode.Git ? "active" : "")"
+                    @onclick="() => SetUploadCodeMode(UploadMode.Git)">
                 Git интеграция
-            </button> *@
+            </button>
 
         </div>
 
         @if (CurUploadMode == UploadMode.Manual)
         {
-            @using Microsoft.AspNetCore.Components.Forms
-
-<div class="upload-box"
+            <div class="upload-box"
                  @ondragover:preventDefault="true"
                  @ondrop="HandleDrop">
 
@@ -123,12 +128,12 @@
 
                 <label>Язык</label>
 
-                <select @bind="codePasteLanguage">
+                <select @bind="pasteCodeLanguage">
 
                     @foreach (var language in Enum.GetValues<CodeLanguage>())
                     {
                         <option value="@language">
-                            @GetLanguageName(language)
+                            @CodeLanguageExtensions.ToDisplayName(language)
                         </option>
                     }
 
@@ -137,7 +142,7 @@
             </div>
 
             <MonacoEditor @bind-Value="pasteCode"
-                          Language="@GetMonacoLanguage(codePasteLanguage)"
+                          CodeLanguage="@pasteCodeLanguage"
                           MinHeight="240px"
                           MaxHeight="700px"
                           BorderRadius="16px" />
@@ -146,8 +151,8 @@
         @if (CurUploadMode == UploadMode.Git)
         {
             <div class="form-group">
-                <label>Git URL</label>
-                <input type="text" placeholder="https://github.com/..." />
+                <label class="not-implemented">Git URL</label>
+                <input class="not-implemented" type="text" placeholder="https://github.com/..." />
             </div>
         }
 
@@ -219,13 +224,13 @@
 
                 <label class="switch">
                     <input type="checkbox"
-                           @bind="Model.HasDeadline" />
+                           @bind="ToggleDeadline" />
                     <span class="slider"></span>
                 </label>
             </label>
 
             <!-- DEADLINE DATE -->
-            @if (Model.HasDeadline)
+            @if (ToggleDeadline)
             {
                 <input type="date"
                        @bind="Model.Deadline" />
@@ -276,12 +281,11 @@
 </div>
 
 @code {
-    private ReviewRequestModel Model = new();
+    private CreateReviewRequestDto Model = new();
 
     private UploadMode CurUploadMode = UploadMode.Manual;
 
-    private CodeLanguage codePasteLanguage { get; set; } = CodeLanguage.Python;
-
+    private CodeLanguage pasteCodeLanguage = 0;
     private string pasteCode = "";
 
     public enum UploadMode
@@ -291,87 +295,25 @@
         Git
     }
 
-    public enum CodeLanguage
-    {
-        CSharp,
-        JavaScript,
-        TypeScript,
-        Python,
-        Java,
-        Go,
-        Rust,
-        Cpp,
-        Php,
-        Swift,
-        Kotlin,
-        Sql,
-        Html,
-        Css,
-        Json
-    }
+    private bool toggleDeadline = false;
 
-    private string GetLanguageName(CodeLanguage language)
+    public bool ToggleDeadline
     {
-        return language switch
+        get => toggleDeadline;
+        set
         {
-            CodeLanguage.CSharp => "C#",
-            CodeLanguage.JavaScript => "JavaScript",
-            CodeLanguage.TypeScript => "TypeScript",
-            CodeLanguage.Python => "Python",
-            CodeLanguage.Java => "Java",
-            CodeLanguage.Go => "Go",
-            CodeLanguage.Rust => "Rust",
-            CodeLanguage.Cpp => "C++",
-            CodeLanguage.Php => "PHP",
-            CodeLanguage.Swift => "Swift",
-            CodeLanguage.Kotlin => "Kotlin",
-            CodeLanguage.Sql => "SQL",
-            CodeLanguage.Html => "HTML",
-            CodeLanguage.Css => "CSS",
-            CodeLanguage.Json => "JSON",
-            _ => language.ToString()
-        };
+            toggleDeadline = value;
+            Model.Deadline = null;
+        }
     }
 
-    private string GetMonacoLanguage(CodeLanguage language)
-    {
-        return language switch
-        {
-            CodeLanguage.CSharp => "csharp",
-            CodeLanguage.JavaScript => "javascript",
-            CodeLanguage.TypeScript => "typescript",
-            CodeLanguage.Python => "python",
-            CodeLanguage.Java => "java",
-            CodeLanguage.Go => "go",
-            CodeLanguage.Rust => "rust",
-            CodeLanguage.Cpp => "cpp",
-            CodeLanguage.Php => "php",
-            CodeLanguage.Swift => "swift",
-            CodeLanguage.Kotlin => "kotlin",
-            CodeLanguage.Sql => "sql",
-            CodeLanguage.Html => "html",
-            CodeLanguage.Css => "css",
-            CodeLanguage.Json => "json",
-            _ => "plaintext"
-        };
-    }
-
-    private List<UploadedFile> Files = new();
+    private List<ReadedCodeFileDto> Files = new();
 
     private async Task OnFilesSelected(InputFileChangeEventArgs e)
     {
         foreach (var file in e.GetMultipleFiles())
         {
-            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
-            using var reader = new StreamReader(stream);
-
-            var content = await reader.ReadToEndAsync();
-
-            Files.Add(new UploadedFile
-            {
-                Name = file.Name,
-                Content = content
-            });
+            AddFile(await FileService.ReadCodeFileAsync(file));
         }
     }
 
@@ -379,27 +321,30 @@
     {
         // Blazor не даёт FileList напрямую,
         // поэтому используем InputFile как основной канал
+
+        // в душе не чаю шо это значит , так ии сказала , а мне как-бы пофиг , я в фронте не волоку особо
     }
 
-    private void AddFiles(IEnumerable<UploadedFile> files)
+    private void AddFile(ReadedCodeFileDto file)
     {
-        foreach (var file in files)
+        if (!Files.Any(f => f.Name == file.Name))
         {
-            if (!Files.Any(f => f.Name == file.Name))
-            {
-                Files.Add(file);      
-            }
+            Files.Add(file);
         }
     }
 
-    private void RemoveFile(UploadedFile file)
+    private void RemoveFile(ReadedCodeFileDto file)
     {
         Files.Remove(file);
     }
 
-    private void SetMode(UploadMode mode)
+    private void SetUploadCodeMode(UploadMode mode)
     {
         CurUploadMode = mode;
+
+        Files.Clear();
+        pasteCodeLanguage = 0;
+        pasteCode = "";
     }
 
     private void Cancel()
@@ -407,27 +352,8 @@
         Nav.NavigateTo("/profile");
     }
 
-    public class UploadedFile
+    private async Task Create()
     {
-        public string Name { get; set; }
-        public string Content { get; set; }
+        //todo
     }
-
-    public class ReviewRequestModel
-    {
-        public string Name { get; set; }
-
-        public string? Description { get; set; }
-
-        public int Difficulty { get; set; }
-
-        public bool HasDeadline { get; set; } = false;
-
-        public DateTime Deadline { get; set; } = DateTime.UtcNow.AddDays(3);
-
-        public bool AllowEducationalUse { get; set; } = false;
-
-        public int ReviewersCount { get; set; } = 2;
-    }
-
 }

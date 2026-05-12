@@ -1,6 +1,6 @@
 ﻿using P2PReview.Domain.Entities;
 
-namespace P2PReview.Application.Users.DTOs
+namespace P2PReview.Application.Users
 {
     public class UserProfileDto
     {
