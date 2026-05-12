@@ -108,13 +108,13 @@
 
         <div class="tabs">
 
-            <a class="@(activeTab == TubsEnum.Projects ? "active" : "")"
-                   href="@($"/profile/{UserId}?tab=projects")">
+            <a class="@(activeTab == TubsEnum.ReviewRequests ? "active" : "")"
+                   href="@($"/profile/{UserId}?tab=ReviewRequests")">
                 Мои проекты
             </a>
 
-            <a class="@(activeTab == TubsEnum.Reviews ? "active" : "")"
-                   href="@($"/profile/{UserId}?tab=reviews")">
+            <a class="@(activeTab == TubsEnum.TakenReviews ? "active" : "")"
+                   href="@($"/profile/{UserId}?tab=TakenReviews")">
                 Недавние ревью
             </a>
 
@@ -125,13 +125,13 @@
 
         </div>
 
-        @if (activeTab == TubsEnum.Projects)
+        @if (activeTab == TubsEnum.ReviewRequests)
         {
-            <div class="projects-list">
+            <div class="review-requests-list">
 
                 @if (profile?.IsOwnProfile == true)
                 {
-                    <a class="new-project-btn " href="/projects/create">
+                    <a class="new-review-request-btn" href="review/request/create" data-enhance-nav="false">
                         <i class="fa-solid fa-plus"></i>
                     </a>
                 }
@@ -143,9 +143,9 @@
             </div>
         }
 
-        @if (activeTab == TubsEnum.Reviews)
+        @if (activeTab == TubsEnum.TakenReviews)
         {
-            <div class="reviews-list">
+            <div class="taken-reviews-list">
 
                 <div class="empty-state">
                     Пусто :(
@@ -180,12 +180,12 @@
 
     private UserProfileDto? profile;
     private bool isLoading = true;
-    private TubsEnum activeTab = TubsEnum.Projects;
+    private TubsEnum activeTab = TubsEnum.ReviewRequests;
 
     public enum TubsEnum
     {
-        Projects,
-        Reviews,
+        ReviewRequests,
+        TakenReviews,
         Friends,
     }
 
@@ -206,12 +206,12 @@
             }
             else
             {
-                activeTab = TubsEnum.Projects;
+                activeTab = TubsEnum.ReviewRequests;
             }
         }
         else
         {
-            activeTab = TubsEnum.Projects;
+            activeTab = TubsEnum.ReviewRequests;
         }
 
         await LoadProfile();

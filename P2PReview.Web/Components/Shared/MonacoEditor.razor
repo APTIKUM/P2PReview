@@ -1,0 +1,93 @@
+﻿@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div id="@_editorId"
+     style="width:100%;
+    min-height:@MinHeight;
+    max-height:@MaxHeight;
+    border-radius:@BorderRadius;
+    overflow:hidden;">
+</div>
+
+@code {
+
+    [Parameter] public string Value { get; set; } = "";
+
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter] public string Language { get; set; } = "javascript";
+
+    [Parameter] public string MinHeight { get; set; } = "200px";
+
+    [Parameter] public string MaxHeight { get; set; } = "700px";
+
+    [Parameter] public string BorderRadius { get; set; } = "10px";
+
+    private readonly string _editorId = $"monaco_{Guid.NewGuid():N}";
+
+    private DotNetObjectReference<MonacoEditor>? _objRef;
+    private bool _initialized;
+    private string? _previousLanguage;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (_initialized &&
+            _previousLanguage != Language)
+        {
+            _previousLanguage = Language;
+
+            await JS.InvokeVoidAsync(
+                "monacoInterop.setLanguage",
+                _editorId,
+                Language
+            );
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _initialized = true;
+
+            _previousLanguage = Language;
+
+            _objRef = DotNetObjectReference.Create(this);
+
+            await JS.InvokeVoidAsync(
+                "monacoInterop.init",
+                _editorId,
+                Language,
+                Value,
+                MinHeight,
+                MaxHeight,
+                _objRef
+            );
+        }
+    }
+
+    [JSInvokable]
+    public async Task OnEditorValueChanged(string value)
+    {
+        Value = value;
+
+        await ValueChanged.InvokeAsync(value);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        _objRef?.Dispose();
+
+        try
+        {
+            await JS.InvokeVoidAsync(
+                "monacoInterop.dispose",
+                _editorId
+            );
+        }
+        catch
+        {
+            // ignore prerender/navigation errors
+        }
+    }
+}

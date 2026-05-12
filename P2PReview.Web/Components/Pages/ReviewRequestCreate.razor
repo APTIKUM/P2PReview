@@ -1,0 +1,433 @@
+﻿@page "/review/request/create"
+
+@using Microsoft.AspNetCore.Authorization
+@using P2PReview.Web.Components.Shared
+
+@rendermode InteractiveServer
+@attribute [Authorize]
+
+@inject IJSRuntime JS
+@inject NavigationManager Nav
+
+<div class="review-request-create-page">
+
+    <!-- HEADER -->
+    <div class="page-header">
+        <h1>Новый запрос на ревью</h1>
+    </div>
+
+    <!-- PROJECT INFO -->
+    <div class="card">
+
+        <div class="section-title">
+            <i class="fa-regular fa-file-lines"></i>
+            <span>Информация о проекте</span>
+        </div>
+
+        <div class="form-group">
+            <label>Название</label>
+            <input type="text"
+                   placeholder="Введите название"
+                   @bind="Model.Name" />
+        </div>
+
+        <div class="form-group">
+            <label>Описание</label>
+            <textarea rows="4"
+                      placeholder="Краткое описание проекта"
+                      @bind="Model.Description"></textarea>
+        </div>
+
+        <div class="form-group">
+            <label class="not-implemented">Стек технологий</label>
+        </div>
+
+       
+
+    </div>
+
+    <!-- UPLOAD -->
+    <div class="card">
+
+        <div class="section-title">
+            <i class="fa-solid fa-upload"></i>
+            <span>Загрузка кода</span>
+        </div>
+
+        <div class="select-tabs">
+
+            <button class="tab @(CurUploadMode == UploadMode.Manual ? "active" : "")"
+                    @onclick="() => SetMode(UploadMode.Manual)">
+                Ручная загрузка
+            </button>
+
+            <button class="tab @(CurUploadMode == UploadMode.Paste ? "active" : "")"
+                    @onclick="() => SetMode(UploadMode.Paste)">
+                Вставка кода
+            </button>
+
+            @* <button class="tab @(CurUploadMode == UploadMode.Git ? "active" : "")"
+                    @onclick="() => SetMode(UploadMode.Git)">
+                Git интеграция
+            </button> *@
+
+        </div>
+
+        @if (CurUploadMode == UploadMode.Manual)
+        {
+            @using Microsoft.AspNetCore.Components.Forms
+
+<div class="upload-box"
+                 @ondragover:preventDefault="true"
+                 @ondrop="HandleDrop">
+
+                <i class="fa-solid fa-cloud-arrow-up upload-icon"></i>
+
+                <div class="upload-text">
+                    Перетащите файлы сюда или выберите с компьютера
+                </div>
+
+                <InputFile OnChange="OnFilesSelected"
+                           multiple
+                           class="file-input" />
+
+            </div>
+
+            @if (Files.Any())
+            {
+                <div class="file-list">
+                    @foreach (var file in Files)
+                    {
+                        <div class="file-item">
+
+                            <div class="file-header">
+                                @file.Name
+                                <button class="remove-btn"
+                                        @onclick="() => RemoveFile(file)">
+                                    ✕
+                                </button>
+                            </div>
+
+                            <pre class="file-content">@file.Content</pre>
+
+                        </div>
+                    }
+
+                </div>
+            }
+        }
+
+        @if (CurUploadMode == UploadMode.Paste)
+        {
+            <div class="form-group">
+
+                <label>Язык</label>
+
+                <select @bind="codePasteLanguage">
+
+                    @foreach (var language in Enum.GetValues<CodeLanguage>())
+                    {
+                        <option value="@language">
+                            @GetLanguageName(language)
+                        </option>
+                    }
+
+                </select>
+
+            </div>
+
+            <MonacoEditor @bind-Value="pasteCode"
+                          Language="@GetMonacoLanguage(codePasteLanguage)"
+                          MinHeight="240px"
+                          MaxHeight="700px"
+                          BorderRadius="16px" />
+        }
+
+        @if (CurUploadMode == UploadMode.Git)
+        {
+            <div class="form-group">
+                <label>Git URL</label>
+                <input type="text" placeholder="https://github.com/..." />
+            </div>
+        }
+
+    </div>
+
+    <!-- REVIEW SETTINGS -->
+    <div class="card">
+
+        <div class="section-title">
+            <i class="fa-solid fa-gear"></i>
+            <span>Настройки ревью</span>
+        </div>
+
+        <div class="form-group">
+            <label>Количество ревьюеров</label>
+
+            <div class="select-tabs">
+
+                <button class="tab @(Model.ReviewersCount == 1 ? "active" : "")"
+                        @onclick="() => Model.ReviewersCount = 1">
+                    1
+                </button>
+
+                <button class="tab @(Model.ReviewersCount == 2 ? "active" : "")"
+                        @onclick="() => Model.ReviewersCount = 2">
+                    2
+                </button>
+            
+                <button class="tab @(Model.ReviewersCount == 3 ? "active" : "")"
+                        @onclick="() => Model.ReviewersCount = 3">
+                    3
+                </button>
+
+                <button class="tab @(Model.ReviewersCount == 4 ? "active" : "")"
+                        @onclick="() => Model.ReviewersCount = 4">
+                    4
+                </button>
+
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Сложность</label>
+
+            <div class="select-tabs">
+
+                <button class="tab easy @(Model.Difficulty == 0 ? "active" : "")"
+                        @onclick="() => Model.Difficulty = 0">
+                    легко
+                </button>
+
+                <button class="tab norm @(Model.Difficulty == 1 ? "active" : "")"
+                        @onclick="() => Model.Difficulty = 1">
+                    нормально
+                </button>
+            
+                <button class="tab hard @(Model.Difficulty == 2 ? "active" : "")"
+                        @onclick="() => Model.Difficulty = 2">
+                    сложно
+                </button>
+
+            </div>
+        </div>
+
+        <!-- DEADLINE TOGGLE -->
+        <div class="form-group">
+            <label class="toggle-label">
+                <span class="label-text">Дедлайн</span>
+
+                <label class="switch">
+                    <input type="checkbox"
+                           @bind="Model.HasDeadline" />
+                    <span class="slider"></span>
+                </label>
+            </label>
+
+            <!-- DEADLINE DATE -->
+            @if (Model.HasDeadline)
+            {
+                <input type="date"
+                       @bind="Model.Deadline" />
+
+                <small class="hint">
+                    После дедлайна ревью автоматически закрывается
+                </small>
+            }
+
+        </div>
+
+        <!-- EDUCATIONAL TOGGLE -->
+        <div class="form-group">
+            <label class="checkbox-label toggle-label">
+                <span class="label-text">
+                    Разрешаю использовать проект в образовательной базе ревью
+                </span>
+
+                <label class="switch">
+                    <input type="checkbox"
+                           @bind="Model.AllowEducationalUse" />
+                    <span class="slider"></span>
+                </label>
+            </label>
+
+            <small class="hint">
+                Проект может быть опубликован анонимно и использован для обучения ревьюеров
+            </small>
+        </div>
+
+
+
+    </div>
+
+    <!-- ACTIONS -->
+    <div class="actions">
+        <button type="button"
+                class="secondary-btn"
+                @onclick="Cancel">
+            Отмена
+        </button>
+
+        <button type="button" class="primary-btn">
+            Создать
+        </button>
+    </div>
+
+</div>
+
+@code {
+    private ReviewRequestModel Model = new();
+
+    private UploadMode CurUploadMode = UploadMode.Manual;
+
+    private CodeLanguage codePasteLanguage { get; set; } = CodeLanguage.Python;
+
+    private string pasteCode = "";
+
+    public enum UploadMode
+    {
+        Manual,
+        Paste,
+        Git
+    }
+
+    public enum CodeLanguage
+    {
+        CSharp,
+        JavaScript,
+        TypeScript,
+        Python,
+        Java,
+        Go,
+        Rust,
+        Cpp,
+        Php,
+        Swift,
+        Kotlin,
+        Sql,
+        Html,
+        Css,
+        Json
+    }
+
+    private string GetLanguageName(CodeLanguage language)
+    {
+        return language switch
+        {
+            CodeLanguage.CSharp => "C#",
+            CodeLanguage.JavaScript => "JavaScript",
+            CodeLanguage.TypeScript => "TypeScript",
+            CodeLanguage.Python => "Python",
+            CodeLanguage.Java => "Java",
+            CodeLanguage.Go => "Go",
+            CodeLanguage.Rust => "Rust",
+            CodeLanguage.Cpp => "C++",
+            CodeLanguage.Php => "PHP",
+            CodeLanguage.Swift => "Swift",
+            CodeLanguage.Kotlin => "Kotlin",
+            CodeLanguage.Sql => "SQL",
+            CodeLanguage.Html => "HTML",
+            CodeLanguage.Css => "CSS",
+            CodeLanguage.Json => "JSON",
+            _ => language.ToString()
+        };
+    }
+
+    private string GetMonacoLanguage(CodeLanguage language)
+    {
+        return language switch
+        {
+            CodeLanguage.CSharp => "csharp",
+            CodeLanguage.JavaScript => "javascript",
+            CodeLanguage.TypeScript => "typescript",
+            CodeLanguage.Python => "python",
+            CodeLanguage.Java => "java",
+            CodeLanguage.Go => "go",
+            CodeLanguage.Rust => "rust",
+            CodeLanguage.Cpp => "cpp",
+            CodeLanguage.Php => "php",
+            CodeLanguage.Swift => "swift",
+            CodeLanguage.Kotlin => "kotlin",
+            CodeLanguage.Sql => "sql",
+            CodeLanguage.Html => "html",
+            CodeLanguage.Css => "css",
+            CodeLanguage.Json => "json",
+            _ => "plaintext"
+        };
+    }
+
+    private List<UploadedFile> Files = new();
+
+    private async Task OnFilesSelected(InputFileChangeEventArgs e)
+    {
+        foreach (var file in e.GetMultipleFiles())
+        {
+            using var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+            using var reader = new StreamReader(stream);
+
+            var content = await reader.ReadToEndAsync();
+
+            Files.Add(new UploadedFile
+            {
+                Name = file.Name,
+                Content = content
+            });
+        }
+    }
+
+    private void HandleDrop(DragEventArgs e)
+    {
+        // Blazor не даёт FileList напрямую,
+        // поэтому используем InputFile как основной канал
+    }
+
+    private void AddFiles(IEnumerable<UploadedFile> files)
+    {
+        foreach (var file in files)
+        {
+            if (!Files.Any(f => f.Name == file.Name))
+            {
+                Files.Add(file);      
+            }
+        }
+    }
+
+    private void RemoveFile(UploadedFile file)
+    {
+        Files.Remove(file);
+    }
+
+    private void SetMode(UploadMode mode)
+    {
+        CurUploadMode = mode;
+    }
+
+    private void Cancel()
+    {
+        Nav.NavigateTo("/profile");
+    }
+
+    public class UploadedFile
+    {
+        public string Name { get; set; }
+        public string Content { get; set; }
+    }
+
+    public class ReviewRequestModel
+    {
+        public string Name { get; set; }
+
+        public string? Description { get; set; }
+
+        public int Difficulty { get; set; }
+
+        public bool HasDeadline { get; set; } = false;
+
+        public DateTime Deadline { get; set; } = DateTime.UtcNow.AddDays(3);
+
+        public bool AllowEducationalUse { get; set; } = false;
+
+        public int ReviewersCount { get; set; } = 2;
+    }
+
+}

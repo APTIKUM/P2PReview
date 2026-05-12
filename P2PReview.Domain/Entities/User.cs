@@ -15,5 +15,7 @@ namespace P2PReview.Domain.Entities
         public string? GitHubUrl { get; set; }
         public string? GitLabUrl { get; set; }
 
+
+        public ICollection<ReviewRequest> ReviewRequests { get; set; } = new List<ReviewRequest>();
     }
 }
