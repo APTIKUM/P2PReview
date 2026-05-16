@@ -1,13 +1,12 @@
 ﻿@page "/review/request/create"
 
 @using Microsoft.AspNetCore.Authorization
+@using P2PReview.Application.Extensions
 @using P2PReview.Application.Files
 @using P2PReview.Application.Interfaces
 @using P2PReview.Application.ReviewRequests
 @using P2PReview.Domain.Enums
 @using P2PReview.Web.Components.Shared
-@using Microsoft.AspNetCore.Components.Forms
-@using P2PReview.Web.Extensions
 
 @rendermode InteractiveServer
 @attribute [Authorize]
@@ -15,6 +14,7 @@
 @inject IJSRuntime JS
 @inject NavigationManager Nav
 @inject IFileService FileService
+@inject IReviewRequestService ReviewRequestService
 
 <div class="review-request-create-page">
 
@@ -22,6 +22,7 @@
     <div class="page-header">
         <h1>Новый запрос на ревью</h1>
     </div>
+
 
     <!-- PROJECT INFO -->
     <div class="card">
@@ -34,15 +35,26 @@
         <div class="form-group">
             <label>Название</label>
             <input type="text"
+                   maxlength="1000"
                    placeholder="Введите название"
-                   @bind="Model.Name" />
+                   @bind="model.Name" />
+
+            @if (!string.IsNullOrWhiteSpace(errorName)
+            && string.IsNullOrWhiteSpace(model.Name))
+            {
+                <div class="validation-error">
+                    @errorName
+                </div>
+            }
+
         </div>
 
         <div class="form-group">
             <label>Описание</label>
             <textarea rows="4"
+                      maxlength="5000"
                       placeholder="Краткое описание проекта"
-                      @bind="Model.Description"></textarea>
+                      @bind="model.Description"></textarea>
         </div>
 
         <div class="form-group">
@@ -98,10 +110,10 @@
 
             </div>
 
-            @if (Files.Any())
+            @if (uploadedFiles.Any())
             {
                 <div class="file-list">
-                    @foreach (var file in Files)
+                    @foreach (var file in uploadedFiles)
                     {
                         <div class="file-item">
 
@@ -112,9 +124,6 @@
                                     ✕
                                 </button>
                             </div>
-
-                            <pre class="file-content">@file.Content</pre>
-
                         </div>
                     }
 
@@ -141,11 +150,11 @@
 
             </div>
 
-            <MonacoEditor @bind-Value="pasteCode"
+            <MonacoEditor @bind-Value="pasteCodeContent"
                           CodeLanguage="@pasteCodeLanguage"
                           MinHeight="240px"
                           MaxHeight="700px"
-                          BorderRadius="16px" />
+                          BorderRadius="10px" />
         }
 
         @if (CurUploadMode == UploadMode.Git)
@@ -153,6 +162,13 @@
             <div class="form-group">
                 <label class="not-implemented">Git URL</label>
                 <input class="not-implemented" type="text" placeholder="https://github.com/..." />
+            </div>
+        }
+
+        @if (!string.IsNullOrWhiteSpace(errorUploadCode))
+        {
+            <div class="validation-error">
+                @errorUploadCode
             </div>
         }
 
@@ -171,23 +187,23 @@
 
             <div class="select-tabs">
 
-                <button class="tab @(Model.ReviewersCount == 1 ? "active" : "")"
-                        @onclick="() => Model.ReviewersCount = 1">
+                <button class="tab @(model.ReviewersCount == 1 ? "active" : "")"
+                        @onclick="() => model.ReviewersCount = 1">
                     1
                 </button>
 
-                <button class="tab @(Model.ReviewersCount == 2 ? "active" : "")"
-                        @onclick="() => Model.ReviewersCount = 2">
+                <button class="tab @(model.ReviewersCount == 2 ? "active" : "")"
+                        @onclick="() => model.ReviewersCount = 2">
                     2
                 </button>
             
-                <button class="tab @(Model.ReviewersCount == 3 ? "active" : "")"
-                        @onclick="() => Model.ReviewersCount = 3">
+                <button class="tab @(model.ReviewersCount == 3 ? "active" : "")"
+                        @onclick="() => model.ReviewersCount = 3">
                     3
                 </button>
 
-                <button class="tab @(Model.ReviewersCount == 4 ? "active" : "")"
-                        @onclick="() => Model.ReviewersCount = 4">
+                <button class="tab @(model.ReviewersCount == 4 ? "active" : "")"
+                        @onclick="() => model.ReviewersCount = 4">
                     4
                 </button>
 
@@ -199,18 +215,18 @@
 
             <div class="select-tabs">
 
-                <button class="tab easy @(Model.Difficulty == 0 ? "active" : "")"
-                        @onclick="() => Model.Difficulty = 0">
+                <button class="tab easy @(model.Difficulty == 0 ? "active" : "")"
+                        @onclick="() => model.Difficulty = 0">
                     легко
                 </button>
 
-                <button class="tab norm @(Model.Difficulty == 1 ? "active" : "")"
-                        @onclick="() => Model.Difficulty = 1">
+                <button class="tab norm @(model.Difficulty == 1 ? "active" : "")"
+                        @onclick="() => model.Difficulty = 1">
                     нормально
                 </button>
             
-                <button class="tab hard @(Model.Difficulty == 2 ? "active" : "")"
-                        @onclick="() => Model.Difficulty = 2">
+                <button class="tab hard @(model.Difficulty == 2 ? "active" : "")"
+                        @onclick="() => model.Difficulty = 2">
                     сложно
                 </button>
 
@@ -233,11 +249,18 @@
             @if (ToggleDeadline)
             {
                 <input type="date"
-                       @bind="Model.Deadline" />
+                       @bind="model.Deadline" />
 
                 <small class="hint">
                     После дедлайна ревью автоматически закрывается
                 </small>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(errorDeadline))
+            {
+                <div class="validation-error">
+                    @errorDeadline
+                </div>
             }
 
         </div>
@@ -251,7 +274,7 @@
 
                 <label class="switch">
                     <input type="checkbox"
-                           @bind="Model.AllowEducationalUse" />
+                           @bind="model.AllowEducationalUse" />
                     <span class="slider"></span>
                 </label>
             </label>
@@ -260,33 +283,35 @@
                 Проект может быть опубликован анонимно и использован для обучения ревьюеров
             </small>
         </div>
-
-
-
     </div>
 
     <!-- ACTIONS -->
     <div class="actions">
+
+        <button type="button" class="btn-save" @onclick="Create">
+            Создать
+        </button>
+
+
         <button type="button"
-                class="secondary-btn"
+                class="btn-cancel"
                 @onclick="Cancel">
             Отмена
         </button>
 
-        <button type="button" class="primary-btn">
-            Создать
-        </button>
+
     </div>
 
 </div>
 
 @code {
-    private CreateReviewRequestDto Model = new();
+    private CreateReviewRequestDto model = new();
 
     private UploadMode CurUploadMode = UploadMode.Manual;
 
     private CodeLanguage pasteCodeLanguage = 0;
-    private string pasteCode = "";
+
+    private string pasteCodeContent = "";
 
     public enum UploadMode
     {
@@ -303,11 +328,15 @@
         set
         {
             toggleDeadline = value;
-            Model.Deadline = null;
+            model.Deadline = null;
         }
     }
 
-    private List<ReadedCodeFileDto> Files = new();
+    private List<ReadedCodeFileDto> uploadedFiles = new();
+
+    private string? errorName = null;
+    private string? errorUploadCode = null;
+    private string? errorDeadline = null;
 
     private async Task OnFilesSelected(InputFileChangeEventArgs e)
     {
@@ -327,24 +356,25 @@
 
     private void AddFile(ReadedCodeFileDto file)
     {
-        if (!Files.Any(f => f.Name == file.Name))
+        if (!uploadedFiles.Any(f => f.Name == file.Name))
         {
-            Files.Add(file);
+            uploadedFiles.Add(file);
         }
     }
 
     private void RemoveFile(ReadedCodeFileDto file)
     {
-        Files.Remove(file);
+        uploadedFiles.Remove(file);
     }
 
     private void SetUploadCodeMode(UploadMode mode)
     {
         CurUploadMode = mode;
 
-        Files.Clear();
+        errorUploadCode = null;
+        uploadedFiles.Clear();
         pasteCodeLanguage = 0;
-        pasteCode = "";
+        pasteCodeContent = "";
     }
 
     private void Cancel()
@@ -352,8 +382,71 @@
         Nav.NavigateTo("/profile");
     }
 
+    private bool ValidateModel()
+    {
+        var success = true;
+
+        errorName = null;
+        errorUploadCode = null;
+        errorDeadline = null;
+
+        if (string.IsNullOrWhiteSpace(model.Name))
+        {
+            errorName = "Обязательно для заполнения";
+            success = false;
+        }
+
+
+        if (CurUploadMode == UploadMode.Manual)
+        {
+            if (uploadedFiles.Count == 0)
+            {
+                errorUploadCode = "Файлы не загружены";
+                success = false;
+            }
+        }
+        else if (CurUploadMode == UploadMode.Paste)
+        {
+            if (string.IsNullOrWhiteSpace(pasteCodeContent))
+            {
+                errorUploadCode = "Пустой файл";
+                success = false;
+            }
+        }
+        else
+        {
+            errorUploadCode = "Мне пока лень делать git, используйте ручную загрузку";
+            success = false;
+        }
+
+
+        if (model.Deadline != null && model.Deadline < DateTime.Today)
+        {
+            errorDeadline = "Дедлайн уже прошел";
+            success = false;
+        }
+
+        return success;
+    }
+
     private async Task Create()
     {
-        //todo
+        if (!ValidateModel())
+        {
+            return;
+        }
+
+        if (CurUploadMode == UploadMode.Paste)
+        {
+            AddFile(new ReadedCodeFileDto()
+            {
+                Name = $"main{CodeLanguageExtensions.GetExtension(pasteCodeLanguage)}",
+                Content = pasteCodeContent
+            });
+        }
+
+        var id = await ReviewRequestService.CreateReviewRequestAsync(model, uploadedFiles);
+
+        Nav.NavigateTo($"/review/request/{id}", true);
     }
 }

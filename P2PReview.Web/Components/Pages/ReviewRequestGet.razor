@@ -1,0 +1,62 @@
+﻿@page "/review/request/{Id:guid}"
+@using P2PReview.Application.Interfaces
+@using P2PReview.Application.ReviewRequests
+
+@inject IReviewRequestService ReviewRequestService
+
+<PageTitle>Review Request</PageTitle>
+
+<h3>Review Request</h3>
+
+@if (reviewRequest == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <div>
+        <p><b>Id:</b> @reviewRequest.Id</p>
+        <p><b>UserId:</b> @reviewRequest.UserId</p>
+        <p><b>Name:</b> @reviewRequest.Name</p>
+        <p><b>Description:</b> @reviewRequest.Description</p>
+        <p><b>Difficulty:</b> @reviewRequest.Difficulty</p>
+        <p><b>CreatedAt:</b> @reviewRequest.CreatedAt</p>
+        <p><b>Deadline:</b> @reviewRequest.Deadline</p>
+        <p><b>TechStack:</b> @reviewRequest.TechStack</p>
+        <p><b>ReviewersCount:</b> @reviewRequest.ReviewersCount</p>
+        <p><b>IsOwnReview:</b> @reviewRequest.IsOwnReview</p>
+
+        <h4>Files</h4>
+
+        @if (reviewRequest.Files != null && reviewRequest.Files.Any())
+        {
+            @foreach (var file in reviewRequest.Files)
+            {
+                <div>
+                    <hr />
+                    <p><b>File:</b> @file.Name</p>
+
+                    <pre>
+@file.Content
+                    </pre>
+                </div>
+            }
+        }
+        else
+        {
+            <p>No files</p>
+        }
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private ReviewRequestDto? reviewRequest;
+
+    protected override async Task OnInitializedAsync()
+    {
+        reviewRequest = await ReviewRequestService.GetReviewRequestAsync(Id.ToString());
+    }
+}

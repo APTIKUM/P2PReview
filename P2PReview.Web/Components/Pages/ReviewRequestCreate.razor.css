@@ -88,11 +88,20 @@ body {
     margin-top: 4px;
 }
 
+.validation-error {
+    font-size: 14px;
+    color: red;
+    margin-top: 4px;
+}
+
+.required {
+    color: #e53e3e;
+    margin-left: 4px;
+}
+
 /* =========================
    INPUTS
 ========================= */
-
-
 ::deep input,
 ::deep textarea,
 ::deep select {
@@ -315,33 +324,36 @@ body {
     margin-top: 10px;
 }
 
-.primary-btn {
-    min-width: 180px;
-    padding: 14px;
+.btn-save {
+    max-width: 20%;
+    flex: 1;
+    padding: 12px;
     background: #808FEA;
     color: white;
     border: none;
     border-radius: 10px;
     cursor: pointer;
-    transition: 0.2s;
+    font-family: 'Inter', sans-serif;
 }
 
-    .primary-btn:hover {
+    .btn-save:hover {
         background: #6C7CDA;
     }
 
-.secondary-btn {
-    min-width: 180px;
-    padding: 14px;
+.btn-cancel {
+    max-width: 20%;
+    flex: 1;
+    padding: 12px;
     background: white;
-    border: 2px solid #808FEA;
+    border: none;
     border-radius: 10px;
+    border: 2px #808FEA solid;
     cursor: pointer;
     color: #808FEA;
-    transition: 0.2s;
+    font-family: 'Inter', sans-serif;
 }
 
-    .secondary-btn:hover {
+    .btn-cancel:hover {
         background: #f1f3f7;
     }
 

@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace P2PReview.Domain.Enums
+﻿namespace P2PReview.Domain.Enums
 {
     public enum CodeLanguage
     {
+        PlainText,
         CSharp,
         JavaScript,
         TypeScript,
