@@ -26,7 +26,7 @@
                     @onclick="() => SetTabOpen(Tabs.My)">
                 Мои запросы
             </button>
-            
+
             <button class="tab @(activeTab == Tabs.Archive ? "active" : "")"
                     @onclick="() => SetTabOpen(Tabs.Archive)">
                 База ревью
@@ -35,13 +35,13 @@
         </div>
 
 
-        @if(activeTab != Tabs.Archive)
+        @if (activeTab != Tabs.Archive)
         {
             <div class="reviews-list">
 
                 @foreach (var review in reviewRequests)
                 {
-                    <a class="review-card" href="@($"/review/request/{review.Id}")">
+                    <a class="review-card" href="@($"/review/request/{review.Id}")" data-enhance-nav="false">
 
                         <div class="review-header">
                             <div class="review-title">
@@ -62,10 +62,12 @@
 
                         <div class="review-footer">
 
-                            <div class="review-tech">
+                          
+                            <div class="@(string.IsNullOrWhiteSpace(review.TechStack) ? "" : "review-tech")">
                                 @review.TechStack
                             </div>
 
+                            
                             <div class="review-deadline-label">
                                 @review.DeadlineLabel
                             </div>
@@ -76,8 +78,8 @@
 
             </div>
         }
-        
 
+        
     </div>
 
     <!-- RIGHT -->
@@ -166,12 +168,12 @@
     {
         if (tab == Tabs.Open)
         {
-            reviewRequests = await ReviewRequestService.GetActiveReviewRequestAsync(10) 
+            reviewRequests = await ReviewRequestService.GetActiveReviewRequestAsync(10)
                 ?? new List<ReviewRequestDto>();
         }
         else if (tab == Tabs.My)
         {
-            reviewRequests = await ReviewRequestService.GetAuthUserReviewRequestAsync() 
+            reviewRequests = await ReviewRequestService.GetAuthUserReviewRequestAsync()
                 ?? new List<ReviewRequestDto>();
         }
 
@@ -196,9 +198,9 @@
         await base.OnInitializedAsync();
 
         await UserContext.InitializeAsync();
-        
-        reviewRequests = await ReviewRequestService.GetActiveReviewRequestAsync(10) 
-            ?? new List<ReviewRequestDto>();
+
+        reviewRequests = await ReviewRequestService.GetActiveReviewRequestAsync(10)
+                    ?? new List<ReviewRequestDto>();
 
         (leaders, authLeaderPlace) = await UserService.GetLeaderBoardAsync();
 

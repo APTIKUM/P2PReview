@@ -12,6 +12,7 @@
 </div>
 
 @code {
+    [Parameter] public bool ReadOnly { get; set; } = false;
 
     [Parameter] public string Value { get; set; } = "";
 
@@ -26,6 +27,10 @@
     [Parameter] public string BorderRadius { get; set; } = "10px";
 
     private readonly string _editorId = $"monaco_{Guid.NewGuid():N}";
+    private DotNetObjectReference<MonacoEditor>? _objRef;
+    private bool _initialized;
+    private string? _previousLanguage;
+    private string? _previousValue;
 
     private string language => CodeLanguage switch
     {
@@ -47,14 +52,12 @@
         _ => "plaintext"
     };
 
-    private DotNetObjectReference<MonacoEditor>? _objRef;
-    private bool _initialized;
-    private string? _previousLanguage;
-
     protected override async Task OnParametersSetAsync()
     {
-        if (_initialized &&
-            _previousLanguage != language)
+        if (!_initialized)
+            return;
+
+        if (_previousLanguage != language)
         {
             _previousLanguage = language;
 
@@ -62,6 +65,17 @@
                 "monacoInterop.setLanguage",
                 _editorId,
                 language
+            );
+        }
+
+        if (_previousValue != Value)
+        {
+            _previousValue = Value;
+
+            await JS.InvokeVoidAsync(
+                "monacoInterop.setValue",
+                _editorId,
+                Value
             );
         }
     }
@@ -73,6 +87,7 @@
             _initialized = true;
 
             _previousLanguage = language;
+            _previousValue = Value;
 
             _objRef = DotNetObjectReference.Create(this);
 
@@ -83,6 +98,7 @@
                 Value,
                 MinHeight,
                 MaxHeight,
+                ReadOnly,
                 _objRef
             );
         }

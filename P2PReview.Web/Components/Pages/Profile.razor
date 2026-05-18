@@ -11,6 +11,8 @@
 @inject IUserService UserService
 @inject AvatarUrlProvider AvatarUrlProvider
 
+@rendermode InteractiveServer
+
 <div class="profile-page">
 
     <div class="profile-card">
@@ -107,24 +109,24 @@
 
         <div class="tabs">
 
-            <a class="@(activeTab == TubsEnum.ReviewRequests ? "active" : "")"
-                   href="@($"/profile/{UserId}?tab=ReviewRequests")">
-                Мои проекты
-            </a>
+            <button class="tab @(activeTab == TabsEnum.ReviewRequests ? "active" : "")"
+                    @onclick="() => SetActiveTub(TabsEnum.ReviewRequests)">
+                @(profile?.IsOwnProfile == true ? "Мои проекты" : "Проекты")
+            </button>
 
-            <a class="@(activeTab == TubsEnum.TakenReviews ? "active" : "")"
-                   href="@($"/profile/{UserId}?tab=TakenReviews")">
+            <button class="tab @(activeTab == TabsEnum.TakenReviews ? "active" : "")"
+                    @onclick="() => SetActiveTub(TabsEnum.TakenReviews)">
                 Недавние ревью
-            </a>
+            </button>
 
-            <a class="@(activeTab == TubsEnum.Friends ? "active" : "")"
-                   href="@($"/profile/{UserId}?tab=friends")">
+            <button class="tab @(activeTab == TabsEnum.Friends ? "active" : "")"
+                    @onclick="() => SetActiveTub(TabsEnum.Friends)">
                 Друзья
-            </a>
+            </button>
 
         </div>
 
-        @if (activeTab == TubsEnum.ReviewRequests)
+        @if (activeTab == TabsEnum.ReviewRequests)
         {
             <div class="review-requests-list">
 
@@ -142,7 +144,7 @@
             </div>
         }
 
-        @if (activeTab == TubsEnum.TakenReviews)
+        @if (activeTab == TabsEnum.TakenReviews)
         {
             <div class="taken-reviews-list">
 
@@ -153,7 +155,7 @@
             </div>
         }
 
-        @if (activeTab == TubsEnum.Friends)
+        @if (activeTab == TabsEnum.Friends)
         {
             <div class="friends-list">
 
@@ -179,40 +181,23 @@
 
     private UserProfileDto? profile;
     private bool isLoading = true;
-    private TubsEnum activeTab = TubsEnum.ReviewRequests;
+    private TabsEnum activeTab = TabsEnum.ReviewRequests;
 
-    public enum TubsEnum
+    public enum TabsEnum
     {
         ReviewRequests,
         TakenReviews,
         Friends,
     }
 
+    private async Task SetActiveTub(TabsEnum tab)
+    {
+        activeTab = tab;
+    }
+
 
     protected override async Task OnParametersSetAsync()
     {
-        var uri = Nav.ToAbsoluteUri(Nav.Uri);
-
-        var query = Microsoft.AspNetCore.WebUtilities
-            .QueryHelpers
-            .ParseQuery(uri.Query);
-
-        if (query.TryGetValue("tab", out var tab))
-        {
-            if (Enum.TryParse<TubsEnum>(tab, true, out var parsed))
-            {
-                activeTab = parsed;
-            }
-            else
-            {
-                activeTab = TubsEnum.ReviewRequests;
-            }
-        }
-        else
-        {
-            activeTab = TubsEnum.ReviewRequests;
-        }
-
         await LoadProfile();
     }
 

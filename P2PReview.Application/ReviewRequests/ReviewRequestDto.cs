@@ -45,6 +45,20 @@ namespace P2PReview.Application.ReviewRequests
             }
         }
 
+        public string DifficultyLabel
+        {
+            get
+            {
+                return Difficulty switch
+                {
+                    0 => "просто",
+                    1 => "нормально",
+                    2 => "сложно",
+                    _ => ""
+                };
+            }
+        }
+
         public ICollection<ReadedCodeFileDto>? Files { get; set; }
 
         public ReviewRequestDto(ReviewRequest request)

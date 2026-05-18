@@ -35,7 +35,7 @@ namespace P2PReview.Infrastructure.Services
                 Description = request.Description,
                 Difficulty = request.Difficulty,
                 CreatedAt = DateTime.UtcNow,
-                Deadline = request.Deadline,
+                Deadline = request.Deadline.HasValue ? request.Deadline.Value.Date.AddHours(23).AddMinutes(59) : null,
                 AllowEducationalUse = request.AllowEducationalUse,
                 TechStack = request.TechStack,
                 ReviewersCount = request.ReviewersCount
@@ -129,23 +129,15 @@ namespace P2PReview.Infrastructure.Services
                 return null;
             }
 
-            return new ReviewRequestDto
+            return new ReviewRequestDto(reviewRequest)
             {
-                Id = reviewRequest.Id,
-                Name = reviewRequest.Name,
-                Description = reviewRequest.Description,
-                Difficulty = reviewRequest.Difficulty,
-                CreatedAt = reviewRequest.CreatedAt,
-                Deadline = reviewRequest.Deadline,
-                ReviewersCount = reviewRequest.ReviewersCount,
-
                 IsOwnReview = authId.ToString() == reviewRequest.UserId,
 
-                Files = reviewRequest.Files.Select(f => new ReadedCodeFileDto
+                Files = [.. reviewRequest.Files.Select(f => new ReadedCodeFileDto
                 {
                     Name = f.Name,
                     Content = f.Content
-                }).ToList()
+                })]
             };
         }
     }

@@ -1,7 +1,11 @@
 ﻿@page "/review/request/{Id:guid}"
 
+@using P2PReview.Application.Extensions
+@using P2PReview.Application.Files
 @using P2PReview.Application.Interfaces
 @using P2PReview.Application.ReviewRequests
+@using P2PReview.Domain.Enums
+@using P2PReview.Web.Components.Shared
 
 @rendermode InteractiveServer
 
@@ -10,73 +14,241 @@
 
 <PageTitle>Review Request</PageTitle>
 
-<h3>Review Request</h3>
+<div class="review-page">
 
-@if (reviewRequest == null)
-{
-    <p>Loading...</p>
-}
-else
-{
-    <button @onclick="DeleteReviewRequest">
-        Удалить
-    </button>
+    @if (reviewRequest == null)
+    {
+        <div class="review-container">
+            <p class="loading-text">Неверный url или запрос был удален...</p>
+        </div>
+    }
+    else
+    {
+        <div class="review-container">
 
-    <div>
-        <p><b>Id:</b> @reviewRequest.Id</p>
-        <p><b>UserId:</b> @reviewRequest.UserId</p>
-        <p><b>Name:</b> @reviewRequest.Name</p>
-        <p><b>Description:</b> @reviewRequest.Description</p>
-        <p><b>Difficulty:</b> @reviewRequest.Difficulty</p>
-        <p><b>CreatedAt:</b> @reviewRequest.CreatedAt</p>
-        <p><b>Deadline:</b> @reviewRequest.Deadline</p>
-        <p><b>TechStack:</b> @reviewRequest.TechStack</p>
-        <p><b>ReviewersCount:</b> @reviewRequest.ReviewersCount</p>
-        <p><b>IsOwnReview:</b> @reviewRequest.IsOwnReview</p>
+            <!-- HEADER -->
 
-        <h4>Files</h4>
+            <div class="review-header">
 
-        @if (reviewRequest.Files != null && reviewRequest.Files.Any())
-        {
-            @foreach (var file in reviewRequest.Files)
-            {
-                <div>
-                    <hr />
-                    <p><b>File:</b> @file.Name</p>
+                <!-- TOP ROW -->
+                <div class="review-header-top">
 
-                    <pre>
-@file.Content
-                    </pre>
+                    <div class="review-title-group">
+
+                        <h1 class="review-title">
+                            @reviewRequest.Name
+                        </h1>
+
+                        <div class="difficulty difficulty-@reviewRequest.Difficulty">
+                            @reviewRequest.DifficultyLabel
+                        </div>
+
+                    </div>
+
+                    @if (reviewRequest.IsOwnReview)
+                    {
+                        <button class="delete-btn" @onclick="DeleteReviewRequest">
+                            <i class="fa-solid fa-trash"></i>
+                            Удалить
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="review-btn">
+                            <i class="fa-solid fa-pen"></i>
+                            Начать ревью
+                        </button>
+                    }
+
                 </div>
-            }
-        }
-        else
-        {
-            <p>No files</p>
-        }
-    </div>
-}
+
+                <!-- BOTTOM ROW -->
+                @if (!string.IsNullOrWhiteSpace(reviewRequest.Description))
+                {
+                    <div class="review-description">
+                        @reviewRequest.Description
+                    </div>
+                }
+
+            </div>
+
+            <!-- META -->
+
+            <div class="review-meta">
+
+                @if (!string.IsNullOrWhiteSpace(reviewRequest.TechStack))
+                {
+                    <div class="meta-chip">
+                        <span class="meta-label">Стек:</span>
+                        <span class="meta-value">@reviewRequest.TechStack</span>
+                    </div>
+                }
+
+                <div class="meta-chip">
+                    <span class="meta-label">Дата создания:</span>
+                    <span class="meta-value">
+                        @reviewRequest.CreatedAt.ToString("dd.MM.yyyy")
+                    </span>
+                </div>
+
+                @if (reviewRequest.Deadline.HasValue)
+                {
+                    <div class="meta-chip">
+                        <span class="meta-label">Дедлайн:</span>
+                        <span class="meta-value">
+                            @reviewRequest.Deadline.Value.ToString("dd.MM.yyyy")
+                        </span>
+                    </div>
+                }
+
+                @if (reviewRequest.IsOwnReview)
+                {
+                    <div class="meta-chip">
+                        <span class="meta-label">Ревьюеры:</span>
+                        <span class="meta-value">
+                            @reviewRequest.ReviewersCount
+                        </span>
+                    </div>
+                }
+
+            </div>
+
+            <!-- FILES -->
+
+            <div class="files-section">
+
+                <div class="files-header">
+
+                    <div class="files-title">
+                        Файлы
+                    </div>
+
+                    <div class="files-count">
+                        @(reviewRequest.Files?.Count ?? 0) файлов
+                    </div>
+
+                </div>
+
+                @if (reviewRequest.Files != null && reviewRequest.Files.Any())
+                {
+                    <div class="editor-layout">
+
+                        <!-- SIDEBAR -->
+
+                        <div class="files-sidebar">
+
+                            @foreach (var file in reviewRequest.Files)
+                            {
+                                <button class="file-tab @(selectedFile?.Name == file.Name ? "active" : "")"
+                                        @onclick="() => SelectFile(file)">
+
+                                    <i class="fa-regular fa-file-code"></i>
+
+                                    <span>
+                                        @file.Name
+                                    </span>
+
+                                </button>
+                            }
+
+                        </div>
+
+                        <!-- EDITOR -->
+
+                        <div class="editor-container">
+
+                            <div class="editor-header">
+
+                                <div class="editor-file">
+                                    <i class="fa-regular fa-file-code"></i>
+
+                                    @selectedFile?.Name
+                                </div>
+
+                                <div class="editor-language">
+                                    @CodeLanguageExtensions.ToDisplayName(selectedLanguage)
+                                </div>
+
+                            </div>
+
+                            <MonacoEditor @bind-Value="selectedFile?.Content"
+                                          CodeLanguage="@selectedLanguage"
+                                          ReadOnly="true"
+                                          MinHeight="644px"
+                                          MaxHeight="644px"
+                                          BorderRadius="0px" />
+
+                        </div>
+
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-files">
+                        Нет файлов:(
+                    </div>
+                }
+
+            </div>
+
+        </div>
+    }
+
+</div>
 
 @code {
+
     [Parameter]
     public Guid Id { get; set; }
 
     private ReviewRequestDto? reviewRequest;
 
+    private ReadedCodeFileDto? selectedFile;
+
+    // private string pasteCodeContent = string.Empty;
+
+    private CodeLanguage selectedLanguage = CodeLanguage.PlainText;
+
     private async Task DeleteReviewRequest()
     {
-        var success = await ReviewRequestService.DeleteReviewRequestAsync(reviewRequest.Id);
+        if (reviewRequest == null)
+            return;
+
+        var success = await ReviewRequestService
+            .DeleteReviewRequestAsync(reviewRequest.Id);
 
         if (success)
         {
-            Nav.NavigateTo($"/", true);
+            Nav.NavigateTo("/", true);
         }
     }
+
+    private void SelectFile(ReadedCodeFileDto file)
+    {
+        if (file == null)
+        {
+            return;
+        }
+
+        selectedFile = file;
+
+        // pasteCodeContent = file.Content;
+
+        selectedLanguage = CodeLanguageExtensions.FromFileName(file.Name);
+    }
+
+ 
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
 
         reviewRequest = await ReviewRequestService.GetReviewRequestAsync(Id.ToString());
+
+        if (reviewRequest?.Files != null &&
+            reviewRequest.Files.Any())
+        {
+            SelectFile(reviewRequest.Files.First());
+        }
     }
 }

@@ -210,20 +210,20 @@
     margin-bottom: 16px;
 }
 
-    .tabs a {
-        background: none;
-        border: none;
-        padding: 10px;
-        cursor: pointer;
-        color: #777777;
-        font-size: 18px;
-        text-decoration: none;
-    }
+.tab {
+    background: none;
+    border: none;
+    padding: 10px;
+    cursor: pointer;
+    color: #777777;
+    font-size: 18px;
+    text-decoration: none;
+}
 
-    .tabs .active {
-        color: #6c63ff;
-        border-bottom: 2px solid #6c63ff;
-    }
+.tab.active {
+    color: #6c63ff;
+    border-bottom: 2px solid #6c63ff;
+}
 
 /* EMPTY */
 .empty-state {
@@ -244,5 +244,5 @@
     color: white;
     font-size: 18px;
     text-decoration: none;
-    text-align : center;
+    text-align: center;
 }

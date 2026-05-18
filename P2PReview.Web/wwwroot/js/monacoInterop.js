@@ -53,6 +53,7 @@
         value,
         minHeight,
         maxHeight,
+        readOnly,
         dotnetRef
     ) {
 
@@ -78,7 +79,8 @@
             scrollBeyondLastLine: false,
             minimap: {
                 enabled: true
-            }
+            },
+            readOnly: readOnly
         });
 
         window.monacoInterop.editors[id] = editor;
@@ -130,6 +132,18 @@
         const model = editor.getModel();
 
         monaco.editor.setModelLanguage(model, language);
+    },
+
+    setValue: function (id, value) {
+
+        const editor = window.monacoInterop.editors[id];
+
+        if (!editor)
+            return;
+
+        if (editor.getValue() !== value) {
+            editor.setValue(value ?? "");
+        }
     },
 
     dispose: function (id) {
