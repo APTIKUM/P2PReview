@@ -1,8 +1,12 @@
 ﻿@page "/review/request/{Id:guid}"
+
 @using P2PReview.Application.Interfaces
 @using P2PReview.Application.ReviewRequests
 
+@rendermode InteractiveServer
+
 @inject IReviewRequestService ReviewRequestService
+@inject NavigationManager Nav
 
 <PageTitle>Review Request</PageTitle>
 
@@ -14,6 +18,10 @@
 }
 else
 {
+    <button @onclick="DeleteReviewRequest">
+        Удалить
+    </button>
+
     <div>
         <p><b>Id:</b> @reviewRequest.Id</p>
         <p><b>UserId:</b> @reviewRequest.UserId</p>
@@ -55,8 +63,20 @@ else
 
     private ReviewRequestDto? reviewRequest;
 
+    private async Task DeleteReviewRequest()
+    {
+        var success = await ReviewRequestService.DeleteReviewRequestAsync(reviewRequest.Id);
+
+        if (success)
+        {
+            Nav.NavigateTo($"/", true);
+        }
+    }
+
     protected override async Task OnInitializedAsync()
     {
+        await base.OnInitializedAsync();
+
         reviewRequest = await ReviewRequestService.GetReviewRequestAsync(Id.ToString());
     }
 }

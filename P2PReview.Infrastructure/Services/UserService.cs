@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using P2PReview.Application.Interfaces;
 using P2PReview.Application.Users;
 using P2PReview.Domain.Entities;
@@ -9,14 +10,17 @@ namespace P2PReview.Infrastructure.Services
 {
     public class UserService : IUserService
     {
+        private readonly AppDbContext _context;
         private readonly UserManager<User> _userManager;
         private readonly AuthenticationStateProvider _authStateProvider;
 
         public UserService(UserManager<User> userManager,
-            AuthenticationStateProvider authenticationState)
+            AuthenticationStateProvider authenticationState,
+            AppDbContext context)
         {
             _userManager = userManager;
             _authStateProvider = authenticationState;
+            _context = context;
         }
 
         public async Task<UserProfileDto?> GetAuthProfileAsync()
@@ -28,10 +32,10 @@ namespace P2PReview.Infrastructure.Services
                 return null;
             }
 
-            return await GetUserProfileAsync((Guid)authId);
+            return await GetUserProfileAsync(authId);
         }
 
-        public async Task<Guid?> GetAuthUserId()
+        public async Task<string?> GetAuthUserId()
         {
             var authState = await _authStateProvider.GetAuthenticationStateAsync();
 
@@ -39,10 +43,36 @@ namespace P2PReview.Infrastructure.Services
 
             var currentUserIdClaim = user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
 
-            return Guid.TryParse(currentUserIdClaim, out var id) ? id : null;
+            return currentUserIdClaim;
         }
 
-        public async Task<UserProfileDto?> GetUserProfileAsync(Guid userId)
+        public async Task<(IList<UserProfileDto> leaders, int authPlace)> GetLeaderBoardAsync()
+        {
+            var leader = await _context.Users
+                .OrderByDescending(u => u.QualityScore)
+                .ThenBy(u => u.Id)
+                .Take(5)
+                .Select(u => new UserProfileDto(u))
+                .ToListAsync();
+
+
+            var authUser = await GetAuthProfileAsync();
+
+            if (authUser == null)
+            {
+                return (leader, 0);
+            }
+
+            var authPlace = await _context.Users.CountAsync(u =>
+                    u.QualityScore > authUser.QualityScore 
+                    || (u.QualityScore == authUser.QualityScore && u.Id.CompareTo(authUser.Id) < 0)) + 1;
+
+
+
+            return (leader, authPlace);
+        }
+
+        public async Task<UserProfileDto?> GetUserProfileAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId.ToString());
 

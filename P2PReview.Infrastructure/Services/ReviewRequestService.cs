@@ -1,10 +1,7 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using P2PReview.Application.Auth.Commands;
+﻿using Microsoft.EntityFrameworkCore;
 using P2PReview.Application.Files;
 using P2PReview.Application.Interfaces;
 using P2PReview.Application.ReviewRequests;
-using P2PReview.Application.Users;
 using P2PReview.Domain.Entities;
 
 namespace P2PReview.Infrastructure.Services
@@ -40,7 +37,7 @@ namespace P2PReview.Infrastructure.Services
                 CreatedAt = DateTime.UtcNow,
                 Deadline = request.Deadline,
                 AllowEducationalUse = request.AllowEducationalUse,
-                TechStack = null, //TODO
+                TechStack = request.TechStack,
                 ReviewersCount = request.ReviewersCount
             };
 
@@ -63,7 +60,54 @@ namespace P2PReview.Infrastructure.Services
             return Guid.Parse(reviewRequest.Id);
         }
 
+        public async Task<bool> DeleteReviewRequestAsync(string id)
+        {
+            var authId = await _userService.GetAuthUserId();
 
+            if (authId == null)
+            {
+                return false;
+            }
+
+            var deletedCount = await _context.ReviewRequests
+                .Where(r => r.Id == id && r.UserId == authId)
+                .ExecuteDeleteAsync();
+
+            return deletedCount > 0;
+        }
+
+        public async Task<ICollection<ReviewRequestDto>?> GetActiveReviewRequestAsync(int limit)
+        {
+            return await _context.ReviewRequests
+                .Where(x => x.Deadline == null || x.Deadline >= DateTime.UtcNow.Date)
+                .OrderByDescending(x => x.CreatedAt)
+                .Take(limit)
+                .Select(x => new ReviewRequestDto(x))
+                .ToListAsync();
+        }
+
+        public async Task<ICollection<ReviewRequestDto>?> GetAllReviewRequestAsync()
+        {
+            return await _context.ReviewRequests
+                .Select(x => new ReviewRequestDto(x))
+                .ToListAsync();
+        }
+
+        public async Task<ICollection<ReviewRequestDto>?> GetAuthUserReviewRequestAsync()
+        {
+            var authId = await _userService.GetAuthUserId();
+
+            if (authId == null)
+            {
+                return null;
+            }
+
+            return await _context.ReviewRequests
+                .Where(x => x.UserId == authId)
+                .OrderByDescending(x => x.CreatedAt)
+                .Select(x => new ReviewRequestDto(x))
+                .ToListAsync();
+        }
 
         public async Task<ReviewRequestDto?> GetReviewRequestAsync(string id)
         {

@@ -1,11 +1,9 @@
 ﻿@page "/profile/{UserId:guid}"
 
 @using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Authorization
 @using P2PReview.Application.Interfaces
 @using P2PReview.Application.Users
 @using P2PReview.Web.Services
-@using P2PReview.Web.State
 
 @attribute [Authorize]
 
@@ -224,7 +222,7 @@
 
         try
         {
-            profile = await UserService.GetUserProfileAsync(UserId);
+            profile = await UserService.GetUserProfileAsync(UserId.ToString());
         }
         catch
         {

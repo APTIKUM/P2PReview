@@ -1,12 +1,207 @@
 ﻿@page "/"
 
-@using Microsoft.AspNetCore.Authorization
+@using P2PReview.Application.ReviewRequests
+@using P2PReview.Application.Interfaces
+@using P2PReview.Web.State
 
-@* @attribute [Authorize] *@
+@rendermode InteractiveServer
+
+@inject IReviewRequestService ReviewRequestService
+@inject IUserService UserService
+@inject UserContext UserContext
+
+<div class="home-page">
+
+    <!-- LEFT -->
+    <div class="reviews-panel">
+
+        <div class="tabs">
+
+            <button class="tab @(activeTab == Tabs.Open ? "active" : "")"
+                    @onclick="() => SetTabOpen(Tabs.Open)">
+                Открытые
+            </button>
+
+            <button class="tab @(activeTab == Tabs.My ? "active" : "")"
+                    @onclick="() => SetTabOpen(Tabs.My)">
+                Мои запросы
+            </button>
+            
+            <button class="tab @(activeTab == Tabs.Archive ? "active" : "")"
+                    @onclick="() => SetTabOpen(Tabs.Archive)">
+                База ревью
+            </button>
+
+        </div>
 
 
-<PageTitle>Home</PageTitle>
+        @if(activeTab != Tabs.Archive)
+        {
+            <div class="reviews-list">
 
-<h1>Hello, world!</h1>
+                @foreach (var review in reviewRequests)
+                {
+                    <a class="review-card" href="@($"/review/request/{review.Id}")">
 
-Welcome to your new app.
+                        <div class="review-header">
+                            <div class="review-title">
+                                @review.Name
+                            </div>
+
+                            <div class="difficulty difficulty-@review.Difficulty">
+                                @GetDifficulty(review.Difficulty)
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(review.Description))
+                        {
+                            <div class="review-description">
+                                @(review.Description.Length <= 100 ? review.Description : review.Description.Substring(0, 100))
+                            </div>
+                        }
+
+                        <div class="review-footer">
+
+                            <div class="review-tech">
+                                @review.TechStack
+                            </div>
+
+                            <div class="review-deadline-label">
+                                @review.DeadlineLabel
+                            </div>
+                        </div>
+
+                    </a>
+                }
+
+            </div>
+        }
+        
+
+    </div>
+
+    <!-- RIGHT -->
+    <div class="leaderboard-panel">
+
+        <div class="leaderboard-title">
+            Лидеры
+        </div>
+
+        <div class="leaderboard-list">
+
+            @for (int i = 0; i < leaders.Count; i++)
+            {
+                var leader = leaders[i];
+
+                <a class="leader-card @(i + 1 == authLeaderPlace ? "auth" : "")" href=@($"profile/{leader.Id}")>
+
+                    <div class="leader-place">
+                        #@(i + 1)
+                    </div>
+
+                    <div class="leader-user">
+                        <div class="leader-name">
+                            @leader.UserName
+                        </div>
+                    </div>
+
+                    <div class="leader-xp">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>@leader.QualityScore</span>
+                    </div>
+
+                </a>
+            }
+
+            @if (authLeaderPlace > leaders.Count && UserContext.Profile != null)
+            {
+                <div class="leader-separator">
+                    ···
+                </div>
+
+                var leader = UserContext.Profile;
+
+                <a class="leader-card auth" href=@($"profile/{leader.Id}")>
+
+                    <div class="leader-place">
+                        #@(authLeaderPlace)
+                    </div>
+
+                    <div class="leader-user">
+                        <div class="leader-name">
+                            @leader.UserName
+                        </div>
+                    </div>
+
+                    <div class="leader-xp">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>@leader.QualityScore</span>
+                    </div>
+
+                </a>
+            }
+
+        </div>
+
+    </div>
+
+</div>
+
+@code {
+
+    private Tabs activeTab = Tabs.Open;
+
+    private enum Tabs
+    {
+        Open,
+        Archive,
+        My
+    }
+
+    private ICollection<ReviewRequestDto> reviewRequests = new List<ReviewRequestDto>();
+    private IList<UserProfileDto> leaders = new List<UserProfileDto>();
+    private int authLeaderPlace = 0;
+
+    private async Task SetTabOpen(Tabs tab)
+    {
+        if (tab == Tabs.Open)
+        {
+            reviewRequests = await ReviewRequestService.GetActiveReviewRequestAsync(10) 
+                ?? new List<ReviewRequestDto>();
+        }
+        else if (tab == Tabs.My)
+        {
+            reviewRequests = await ReviewRequestService.GetAuthUserReviewRequestAsync() 
+                ?? new List<ReviewRequestDto>();
+        }
+
+        activeTab = tab;
+    }
+
+    private string GetDifficulty(int difficulty)
+    {
+        return difficulty switch
+        {
+            0 => "просто",
+            1 => "нормально",
+            2 => "сложно",
+            _ => ""
+        };
+    }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        await UserContext.InitializeAsync();
+        
+        reviewRequests = await ReviewRequestService.GetActiveReviewRequestAsync(10) 
+            ?? new List<ReviewRequestDto>();
+
+        (leaders, authLeaderPlace) = await UserService.GetLeaderBoardAsync();
+
+    }
+
+}

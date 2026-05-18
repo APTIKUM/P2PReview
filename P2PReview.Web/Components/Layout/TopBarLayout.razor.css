@@ -107,7 +107,7 @@ main {
 .top-bar {
     background: linear-gradient(135deg, #5f6dfc 0%, #8f5fe8 100%);
     color: white;
-    padding: 10px 0;
+    padding: 5px 0;
     position: sticky;
     top: 0;
     z-index: 100;

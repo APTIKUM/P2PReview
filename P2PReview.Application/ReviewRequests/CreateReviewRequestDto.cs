@@ -10,5 +10,6 @@ namespace P2PReview.Application.ReviewRequests
         public DateTime? Deadline { get; set; } = null;
         public bool AllowEducationalUse { get; set; } = false;
         public int ReviewersCount { get; set; } = 2;
+        public string? TechStack { get; set; }
     }
 }

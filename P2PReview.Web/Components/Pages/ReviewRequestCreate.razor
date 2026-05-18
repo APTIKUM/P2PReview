@@ -57,12 +57,9 @@
                       @bind="model.Description"></textarea>
         </div>
 
-        <div class="form-group">
+        @* <div class="form-group">
             <label class="not-implemented">Стек технологий</label>
-        </div>
-
-       
-
+        </div> *@
     </div>
 
     <!-- UPLOAD -->
@@ -429,6 +426,19 @@
         return success;
     }
 
+    private void StupidTechStack()
+    {
+        try
+        {
+            model.TechStack = CodeLanguageExtensions.ToDisplayName(
+            CodeLanguageExtensions.FromFileName(uploadedFiles.First().Name));
+        }
+        catch
+        {
+
+        }
+    }
+
     private async Task Create()
     {
         if (!ValidateModel())
@@ -444,6 +454,8 @@
                 Content = pasteCodeContent
             });
         }
+
+        StupidTechStack();
 
         var id = await ReviewRequestService.CreateReviewRequestAsync(model, uploadedFiles);
 
