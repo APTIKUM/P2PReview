@@ -17,5 +17,6 @@ namespace P2PReview.Domain.Entities
 
 
         public ICollection<ReviewRequest> ReviewRequests { get; set; } = new List<ReviewRequest>();
+        public ICollection<ReviewResponse> ReviewResponses { get; set; } = new List<ReviewResponse>();
     }
 }

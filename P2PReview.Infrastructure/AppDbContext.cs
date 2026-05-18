@@ -13,6 +13,8 @@ namespace P2PReview.Infrastructure
 
         public DbSet<ReviewRequest> ReviewRequests { get; set; }
         public DbSet<ReviewRequestFile> ReviewRequestFiles { get; set; }
+        public DbSet<ReviewResponse> ReviewResponses { get; set; }
+        public DbSet<ReviewResponseComment> ReviewResponseComments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -28,6 +30,24 @@ namespace P2PReview.Infrastructure
                 .HasOne(x => x.ReviewRequest)
                 .WithMany(x => x.Files)
                 .HasForeignKey(x => x.ReviewRequestId);
+
+            builder.Entity<ReviewResponse>()
+                .HasOne(x => x.User)
+                .WithMany(u => u.ReviewResponses)
+                .HasForeignKey(x => x.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ReviewResponse>()
+                .HasOne(x => x.ReviewRequest)
+                .WithMany(r => r.ReviewResponses)
+                .HasForeignKey(x => x.ReviewRequestId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            builder.Entity<ReviewResponseComment>()
+                .HasOne(x => x.ReviewResponse)
+                .WithMany(r => r.Comments)
+                .HasForeignKey(x => x.ReviewResponseId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

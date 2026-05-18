@@ -16,5 +16,6 @@
 
         // Files
         public ICollection<ReviewRequestFile> Files { get; set; } = new List<ReviewRequestFile>();
+        public ICollection<ReviewResponse> ReviewResponses { get; set; } = new List<ReviewResponse>();
     }
 }

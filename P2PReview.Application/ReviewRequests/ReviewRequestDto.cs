@@ -14,7 +14,7 @@ namespace P2PReview.Application.ReviewRequests
         public DateTime? Deadline { get; set; }
         public string? TechStack { get; set; }
         public int ReviewersCount { get; set; }
-        public bool IsOwnReview { get; set; } = false;
+        public bool IsOwn { get; set; } = false;
 
         // да-да, надо вынести в отедльную dto для карточек , но мне лень, отвалите 🙄
         public string DeadlineLabel

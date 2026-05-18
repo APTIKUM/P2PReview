@@ -1,0 +1,358 @@
+﻿@page "/review/response/{Id:guid}"
+
+@using P2PReview.Application.Extensions
+@using P2PReview.Application.Files
+@using P2PReview.Application.Interfaces
+@using P2PReview.Application.ReviewRequests
+@using P2PReview.Application.ReviewResponses
+@using P2PReview.Domain.Enums
+@using P2PReview.Web.Components.Shared
+
+@rendermode InteractiveServer
+
+@inject IReviewRequestService ReviewRequestService
+@inject IReviewResponseService ReviewResponseService
+@inject NavigationManager Nav
+
+<PageTitle>Review Response</PageTitle>
+
+<div class="review-page">
+
+    @if (reviewRequest == null)
+    {
+        <div class="review-container">
+            <p class="loading-text">Неверный url или ревью удалено...</p>
+        </div>
+    }
+    else
+    {
+        <div class="review-container">
+
+            <!-- HEADER -->
+
+            <div class="review-header">
+
+                <!-- TOP ROW -->
+                <div class="review-header-top">
+
+                    <div class="review-title-group">
+
+                        <h1 class="review-title">
+                            @reviewRequest.Name
+                        </h1>
+
+                        <div class="difficulty difficulty-@reviewRequest.Difficulty">
+                            @reviewRequest.DifficultyLabel
+                        </div>
+
+                    </div>
+
+                    
+                    @if (reviewResponse.IsOwn)
+                    {
+                        <div class="buttons">
+
+                            <button class="save-btn" @onclick="SaveReviewResponse">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                Сохранить
+                            </button>
+
+                            <button class="submit-btn">
+                                <i class="fa-solid fa-paper-plane"></i>
+                                Отправить
+                            </button>
+
+                            <button class="delete-btn" @onclick="DeleteReviewResponse">
+                                <i class="fa-solid fa-trash"></i>
+                                Удалить
+                            </button>
+
+                            
+                        </div>
+                    }
+
+                </div>
+
+                <!-- BOTTOM ROW -->
+                @if (!string.IsNullOrWhiteSpace(reviewRequest.Description))
+                {
+                    <div class="review-description">
+                        @reviewRequest.Description
+                    </div>
+                }
+
+            </div>
+
+            <!-- META -->
+
+            <div class="review-meta">
+
+                @if (!string.IsNullOrWhiteSpace(reviewRequest.TechStack))
+                {
+                    <div class="meta-chip">
+                        <span class="meta-label">Стек:</span>
+                        <span class="meta-value">@reviewRequest.TechStack</span>
+                    </div>
+                }
+
+                @* <div class="meta-chip">
+                    <span class="meta-label">Дата создания:</span>
+                    <span class="meta-value">
+                        @reviewRequest.CreatedAt.ToString("dd.MM.yyyy")
+                    </span>
+                </div> *@
+
+                @if (reviewRequest.Deadline.HasValue && reviewResponse.IsOwn)
+                {
+                    <div class="meta-chip">
+                        <span class="meta-label">Дедлайн:</span>
+                        <span class="meta-value">
+                            @($"{reviewRequest.Deadline.Value.ToString("dd.MM.yyyy")} ({reviewRequest.DeadlineLabel})")
+                        </span>
+                    </div>
+                }
+
+            </div>
+
+            <!-- FILES -->
+
+            <div class="files-section">
+
+                <div class="files-header">
+
+                    <div class="files-title">
+                        Файлы
+                    </div>
+
+                    <div class="files-count">
+                        @(reviewRequest.Files?.Count ?? 0) файлов
+                    </div>
+
+                </div>
+
+                @if (reviewRequest.Files != null && reviewRequest.Files.Any())
+                {
+                    <div class="editor-layout">
+
+                        <!-- SIDEBAR -->
+
+                        <div class="files-sidebar">
+
+                            @foreach (var file in reviewRequest.Files)
+                            {
+                                <button class="file-tab @(selectedFile?.Name == file.Name ? "active" : "")"
+                                        @onclick="() => SelectFile(file)">
+
+                                    <i class="fa-regular fa-file-code"></i>
+
+                                    <span>
+                                        @file.Name
+                                    </span>
+
+                                </button>
+                            }
+
+                        </div>
+
+                        <!-- EDITOR -->
+
+                        <div class="editor-container">
+
+                            <div class="editor-header">
+
+                                <div class="editor-file">
+                                    <i class="fa-regular fa-file-code"></i>
+
+                                    @selectedFile?.Name
+                                </div>
+
+                                <div class="editor-language">
+                                    @CodeLanguageExtensions.ToDisplayName(selectedLanguage)
+                                </div>
+
+                            </div>
+
+                            <MonacoEditor @bind-Value="selectedFile?.Content"
+                                          CodeLanguage="@selectedLanguage"
+                                          ReadOnly="true"
+                                          MinHeight="644px"
+                                          MaxHeight="644px"
+                                          BorderRadius="0px" />
+
+                        </div>
+
+                    </div>
+                }
+                else
+                {
+                    <div class="empty-files">
+                        Нет файлов:(
+                    </div>
+                }
+
+            </div>
+
+
+            <div class="review-evaluation">
+
+                <!-- CODE RATING -->
+                <div class="evaluation-block">
+
+                    <div class="evaluation-label">Оценка кода</div>
+
+                    <div class="rating-row">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            var rating = i;
+
+                            <button class="rating-btn @(reviewResponse.CodeRating == i ? "active" : "")"
+                                    @onclick="() => SetCodeRating(rating)">
+                                @i
+                            </button>
+                        }
+                    </div>
+
+                    @if (reviewResponse.IsOwn && reviewResponse.Status == ReviewResponseStatus.InProgress)
+                    {
+                        <textarea class="evaluation-textarea"
+                                  placeholder="Комментарий по коду..."
+                                  @bind="reviewResponse.Summary"></textarea>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(reviewResponse.Summary))
+                    {
+                        <div class="evaluation-readonly">
+                            @reviewResponse.Summary
+                        </div>
+                    }
+
+                    
+                </div>
+
+                <!-- REVIEW RATING -->
+                @if (reviewResponse.Status != ReviewResponseStatus.InProgress)
+                {
+                    <div class="evaluation-block">
+
+                        <div class="evaluation-label">Оценка ревью</div>
+
+                        <div class="rating-row">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                var rating = i;
+
+                                <button class="rating-btn @(reviewResponse.ReviewRating == i ? "active" : "")"
+                                        @onclick="() => SetCodeRating(rating)">
+                                    @i
+                                </button>
+                            }
+                        </div>
+                        @if (reviewRequest.IsOwn)
+                        {
+                            <textarea class="evaluation-textarea"
+                                      placeholder="Обратная связь по ревью..."
+                                      @bind="reviewResponse.ReviewFeedback"></textarea>
+                        }
+                        else if (!string.IsNullOrWhiteSpace(reviewResponse.ReviewFeedback))
+                        {
+                            <div class="evaluation-readonly">
+                                @reviewResponse.ReviewFeedback
+                            </div>
+                        }
+                    </div>
+                }
+
+            </div>
+
+        </div>
+    }
+
+</div>
+
+@code {
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private ReviewResponseDto? reviewResponse;
+    private ReviewRequestDto? reviewRequest;
+
+    private ReadedCodeFileDto? selectedFile;
+    private CodeLanguage selectedLanguage = CodeLanguage.PlainText;
+
+    private async Task SetCodeRating(int rating)
+    {
+        if (reviewResponse.IsOwn && reviewResponse.Status == ReviewResponseStatus.InProgress)
+        {
+            reviewResponse.CodeRating = rating;
+        }
+    }
+
+    private async Task SetReviewRating(int rating)
+    {
+        if (reviewRequest.IsOwn && reviewResponse.Status == ReviewResponseStatus.Submitted)
+        {
+            reviewResponse.ReviewRating = rating;
+        }
+    }
+
+    private async Task SaveReviewResponse()
+    {
+        var updateDto = new UpdateReviewResponseDto()
+            {
+                CodeRating = reviewResponse?.CodeRating,
+                Summary = reviewResponse?.Summary,
+                ReviewRating = reviewResponse?.ReviewRating,
+                ReviewFeedback = reviewResponse?.ReviewFeedback
+            };
+
+        var success = await ReviewResponseService.UpdateReviewResponseAsync(reviewResponse?.Id, updateDto);
+    }
+
+    private async Task DeleteReviewResponse()
+    {
+        if (reviewResponse == null)
+            return;
+
+        var success = await ReviewResponseService
+            .DeleteReviewResponseAsync(reviewResponse.Id);
+
+        if (success)
+        {
+            Nav.NavigateTo("/", true);
+        }
+    }
+
+    private void SelectFile(ReadedCodeFileDto file)
+    {
+        if (file == null)
+        {
+            return;
+        }
+
+        selectedFile = file;
+
+        selectedLanguage = CodeLanguageExtensions.FromFileName(file.Name);
+    }
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        reviewResponse = await ReviewResponseService.GetReviewResponseAsync(Id.ToString());
+
+        if (reviewResponse == null)
+        {
+            return;
+        }
+
+        reviewRequest = await ReviewRequestService.GetReviewRequestAsync(reviewResponse.ReviewRequestId);
+
+        if (reviewRequest?.Files != null &&
+            reviewRequest.Files.Any())
+        {
+            SelectFile(reviewRequest.Files.First());
+        }
+    }
+}

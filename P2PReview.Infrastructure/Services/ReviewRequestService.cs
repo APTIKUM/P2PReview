@@ -114,12 +114,6 @@ namespace P2PReview.Infrastructure.Services
 
             var authId = await _userService.GetAuthUserId();
 
-            if (authId == null)
-            {
-                return null;
-            }
-
-
             var reviewRequest = await _context.ReviewRequests
                 .Include(r => r.Files)
                 .FirstOrDefaultAsync(r => r.Id == id);
@@ -131,10 +125,11 @@ namespace P2PReview.Infrastructure.Services
 
             return new ReviewRequestDto(reviewRequest)
             {
-                IsOwnReview = authId.ToString() == reviewRequest.UserId,
+                IsOwn = authId == reviewRequest.UserId,
 
                 Files = [.. reviewRequest.Files.Select(f => new ReadedCodeFileDto
                 {
+                    Id = f.Id,
                     Name = f.Name,
                     Content = f.Content
                 })]

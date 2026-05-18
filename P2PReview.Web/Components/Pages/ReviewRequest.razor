@@ -4,12 +4,14 @@
 @using P2PReview.Application.Files
 @using P2PReview.Application.Interfaces
 @using P2PReview.Application.ReviewRequests
+@using P2PReview.Application.ReviewResponses
 @using P2PReview.Domain.Enums
 @using P2PReview.Web.Components.Shared
 
 @rendermode InteractiveServer
 
 @inject IReviewRequestService ReviewRequestService
+@inject IReviewResponseService ReviewResponseService
 @inject NavigationManager Nav
 
 <PageTitle>Review Request</PageTitle>
@@ -45,7 +47,7 @@
 
                     </div>
 
-                    @if (reviewRequest.IsOwnReview)
+                    @if (reviewRequest.IsOwn)
                     {
                         <button class="delete-btn" @onclick="DeleteReviewRequest">
                             <i class="fa-solid fa-trash"></i>
@@ -54,7 +56,7 @@
                     }
                     else
                     {
-                        <button class="review-btn">
+                        <button class="review-btn" @onclick="CreateReviewResponse">
                             <i class="fa-solid fa-pen"></i>
                             Начать ревью
                         </button>
@@ -101,7 +103,7 @@
                     </div>
                 }
 
-                @if (reviewRequest.IsOwnReview)
+                @if (reviewRequest.IsOwn)
                 {
                     <div class="meta-chip">
                         <span class="meta-label">Ревьюеры:</span>
@@ -237,7 +239,18 @@
         selectedLanguage = CodeLanguageExtensions.FromFileName(file.Name);
     }
 
- 
+
+    private async Task CreateReviewResponse()
+    {
+        var id = await ReviewResponseService.CreateReviewResponseAsync(
+            new CreateReviewResponseDto() { ReviewRequestId = reviewRequest.Id });
+
+        if (id != null)
+        {
+            Nav.NavigateTo($"/review/response/{id}", forceLoad: true);
+        }
+    }
+
 
     protected override async Task OnInitializedAsync()
     {
