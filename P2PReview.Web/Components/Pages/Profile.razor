@@ -4,11 +4,16 @@
 @using P2PReview.Application.Interfaces
 @using P2PReview.Application.Users
 @using P2PReview.Web.Services
+@using P2PReview.Application.ReviewRequests
+@using P2PReview.Application.ReviewResponses
+@using P2PReview.Domain.Enums
 
 @attribute [Authorize]
 
 @inject NavigationManager Nav
 @inject IUserService UserService
+@inject IReviewRequestService ReviewRequestService
+@inject IReviewResponseService ReviewResponseService
 @inject AvatarUrlProvider AvatarUrlProvider
 
 @rendermode InteractiveServer
@@ -28,8 +33,8 @@
                 <i class="fa-solid fa-pen"></i>
             </a>
         }
-     
 
+     
         <img class="profile-avatar"
              src="@AvatarUrlProvider.GetAvatarUrl(profile?.AvatarId)" />
 
@@ -69,7 +74,7 @@
                         <span class="big">@(profile?.ReviewsGiven ?? 0)</span>
                         <span class="small">Всего</span>
                     </div>
-                </div> 
+                </div>
 
                 <div class="legend">
 
@@ -104,19 +109,19 @@
     </div>
 
 
-     <!-- RIGHT PANEL -->
+    <!-- RIGHT PANEL -->
     <div class="profile-content">
 
         <div class="tabs">
 
             <button class="tab @(activeTab == TabsEnum.ReviewRequests ? "active" : "")"
                     @onclick="() => SetActiveTub(TabsEnum.ReviewRequests)">
-                @(profile?.IsOwnProfile == true ? "Мои проекты" : "Проекты")
+                Запросы на ревью
             </button>
 
-            <button class="tab @(activeTab == TabsEnum.TakenReviews ? "active" : "")"
-                    @onclick="() => SetActiveTub(TabsEnum.TakenReviews)">
-                Недавние ревью
+            <button class="tab @(activeTab == TabsEnum.ReviewResponses ? "active" : "")"
+                    @onclick="() => SetActiveTub(TabsEnum.ReviewResponses)">
+                Проведенные ревью
             </button>
 
             <button class="tab @(activeTab == TabsEnum.Friends ? "active" : "")"
@@ -128,34 +133,149 @@
 
         @if (activeTab == TabsEnum.ReviewRequests)
         {
-            <div class="review-requests-list">
+            <div class="reviews-list">
 
-                @if (profile?.IsOwnProfile == true)
+                @if (profile?.IsOwnProfile == true && activeTab == TabsEnum.ReviewRequests)
                 {
                     <a class="new-review-request-btn" href="review/request/create" data-enhance-nav="false">
-                        <i class="fa-solid fa-plus"></i>
+                        Новый
                     </a>
                 }
 
-                <div class="empty-state">
-                    Пусто :(
-                </div>
+                @foreach (var review in reviewRequests)
+                {
+                    <a class="review-card" href="@($"/review/request/{review.Id}")" data-enhance-nav="false">
+
+                        <div class="review-header">
+                            <div class="review-title">
+                                @review.Name
+                            </div>
+
+                            <div class="difficulty difficulty-@review.Difficulty">
+                                @review.DifficultyLabel
+                            </div>
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(review.Description))
+                        {
+                            <div class="review-description">
+                                @(review.Description.Length <= 100 ? review.Description : review.Description.Substring(0, 100))
+                            </div>
+                        }
+
+                        <div class="review-footer">
+
+              
+                            <div class="@(string.IsNullOrWhiteSpace(review.TechStack) ? "" : "review-tech")">
+                                @review.TechStack
+                            </div>
+
+                            <div class="review-deadline-label">
+                                @review.DeadlineLabel
+                            </div>
+                        </div>
+
+                    </a>
+                }
+
+                @if (reviewRequests.Count == 0)
+                {
+                    <div class="empty-state">
+                        Пусто :(
+                    </div>
+                }
 
             </div>
         }
-
-        @if (activeTab == TabsEnum.TakenReviews)
+        else if (activeTab == TabsEnum.ReviewResponses)
         {
-            <div class="taken-reviews-list">
+            <div class="review-requests-list">
 
-                <div class="empty-state">
-                    Пусто :(
+                <div class="reviews-list">
+
+                    @foreach ((var response, var request) in reviewResponses)
+                    {
+                        <a class="review-card" href="@($"/review/response/{response.Id}")" data-enhance-nav="false">
+
+                            <div class="review-header">
+                                <div class="review-title">
+                                    @request.Name
+                                </div>
+
+                                <div class="review-meta">
+
+                                    <div class="difficulty difficulty-@request.Difficulty">
+                                        @request.DifficultyLabel
+                                    </div>
+
+                                </div>
+                            </div>
+
+
+                            <div class="review-header">
+
+                                <div class="review-description">
+                                    @(request.Description)
+                                </div>
+
+                                @if (response.Status == ReviewResponseStatus.InProgress)
+                                {
+                                    <div class="status-banner inprogress">
+                                        <i class="fa-solid fa-pen"></i>
+                                        <span>В работе</span>
+                                    </div>
+                                }
+                                else if (response.Status == ReviewResponseStatus.Submitted)
+                                {
+                                    <div class="status-banner submitted">
+                                        <i class="fa-regular fa-clock"></i>
+                                        <span>Ждет оценки</span>
+                                    </div>
+                                }
+                                else if (response.Status == ReviewResponseStatus.Accepted)
+                                {
+                                    <div class="status-banner accepted">
+                                        <i class="fa-solid fa-check"></i>
+                                        <span>Принято</span>
+                                    </div>
+                                }
+                                else if (response.Status == ReviewResponseStatus.Rejected)
+                                {
+                                    <div class="status-banner rejected">
+                                        <i class="fa-solid fa-xmark"></i>
+                                        <span>Отклонено</span>
+                                    </div>
+                                }
+
+                            </div>
+                            
+                            <div class="review-footer">
+
+              
+                                <div class="@(string.IsNullOrWhiteSpace(request.TechStack) ? "" : "review-tech")">
+                                    @request.TechStack
+                                </div>
+
+                                <div class="review-deadline-label">
+                                    @request.DeadlineLabel
+                                </div>
+                            </div>
+
+                        </a>
+                    }
+
                 </div>
+
+                @if (reviewResponses.Count == 0)
+                {
+                    <div class="empty-state">
+                        Пусто :(
+                    </div>
+                }
 
             </div>
         }
-
-        @if (activeTab == TabsEnum.Friends)
+        else if (activeTab == TabsEnum.Friends)
         {
             <div class="friends-list">
 
@@ -165,13 +285,7 @@
 
             </div>
         }
-
-
-        
-
-
-
-    </div> 
+    </div>
 
 </div>
 
@@ -186,12 +300,31 @@
     public enum TabsEnum
     {
         ReviewRequests,
-        TakenReviews,
+        ReviewResponses,
         Friends,
     }
 
+    private ICollection<ReviewRequestDto> reviewRequests = new List<ReviewRequestDto>();
+    private ICollection<(ReviewResponseDto response, ReviewRequestDto request)> reviewResponses = new List<(ReviewResponseDto response, ReviewRequestDto request)>();
+
     private async Task SetActiveTub(TabsEnum tab)
     {
+        if (tab == TabsEnum.ReviewRequests)
+        {
+            reviewRequests = await ReviewRequestService.GetUserReviewRequestAsync(UserId.ToString())
+                ?? new List<ReviewRequestDto>();
+        }
+        else if (tab == TabsEnum.ReviewResponses)
+        {
+            var responses = await ReviewResponseService.GetUserResponsesAsync(UserId.ToString())
+                ?? new List<ReviewResponseDto>();
+
+            var tasks = responses.Select(async res =>
+                (res, await ReviewRequestService.GetReviewRequestAsync(res.ReviewRequestId)));
+
+            reviewResponses = (await Task.WhenAll(tasks)).ToList();
+        }
+
         activeTab = tab;
     }
 
@@ -199,6 +332,7 @@
     protected override async Task OnParametersSetAsync()
     {
         await LoadProfile();
+        await SetActiveTub(TabsEnum.ReviewRequests);
     }
 
     private async Task LoadProfile()

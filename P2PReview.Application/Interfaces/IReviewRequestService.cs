@@ -11,6 +11,7 @@ namespace P2PReview.Application.Interfaces
         public Task<ICollection<ReviewRequestDto>?> GetActiveReviewRequestAsync(int limit);
 
         public Task<ICollection<ReviewRequestDto>?> GetAuthUserReviewRequestAsync();
+        public Task<ICollection<ReviewRequestDto>?> GetUserReviewRequestAsync(string userId);
         public Task<bool> DeleteReviewRequestAsync(string id);
     }
 }

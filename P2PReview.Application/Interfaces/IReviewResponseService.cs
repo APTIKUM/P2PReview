@@ -4,11 +4,14 @@ namespace P2PReview.Application.Interfaces
 {
     public interface IReviewResponseService
     {
-        public Task<string?> CreateReviewResponseAsync(CreateReviewResponseDto createDto);
-        public Task<ReviewResponseDto?> GetReviewResponseAsync(string id);
-        public Task<ReviewResponseDto?> UpdateReviewResponseAsync(string id,
+        public Task<string?> CreateResponseAsync(CreateReviewResponseDto createDto);
+        public Task<ReviewResponseDto?> GetResponseAsync(string id);
+        public Task<ReviewResponseDto?> UpdateResponseAsync(string id,
             UpdateReviewResponseDto updateDto);
 
-        public Task<bool> DeleteReviewResponseAsync(string id);
+        public Task<bool> DeleteResponseAsync(string id);
+        public Task<ICollection<ReviewResponseDto>?> GetResponsesByRequestIdAsync(string requestId);
+
+        public Task<ICollection<ReviewResponseDto>?> GetUserResponsesAsync(string userId);
     }
 }

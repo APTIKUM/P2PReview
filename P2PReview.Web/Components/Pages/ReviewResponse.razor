@@ -18,7 +18,7 @@
 
 <div class="review-page">
 
-    @if (reviewRequest == null)
+    @if (reviewResponse == null)
     {
         <div class="review-container">
             <p class="loading-text">Неверный url или ревью удалено...</p>
@@ -47,27 +47,65 @@
 
                     </div>
 
-                    
                     @if (reviewResponse.IsOwn)
                     {
-                        <div class="buttons">
+                        if (reviewResponse.Status == ReviewResponseStatus.InProgress)
+                        {
+                            <div class="buttons">
+                                <button class="save-btn" @onclick="async () => await SaveReviewResponse()">
+                                    <i class="fa-solid fa-floppy-disk"></i>
+                                    Сохранить
+                                </button>
 
-                            <button class="save-btn" @onclick="SaveReviewResponse">
-                                <i class="fa-solid fa-floppy-disk"></i>
-                                Сохранить
-                            </button>
+                                <button class="submit-btn" @onclick="async () => await SaveReviewResponse(ReviewResponseStatus.Submitted)">
+                                    <i class="fa-solid fa-paper-plane"></i>
+                                    Отправить
+                                </button>
 
-                            <button class="submit-btn">
-                                <i class="fa-solid fa-paper-plane"></i>
-                                Отправить
-                            </button>
+                                <button class="delete-btn" @onclick="DeleteReviewResponse">
+                                    <i class="fa-solid fa-trash"></i>
+                                    Удалить
+                                </button>
+                            </div>
+                        }
+                        else if (reviewResponse.Status == ReviewResponseStatus.Submitted)
+                        {
+                            <div class="status-banner submitted">
+                                <i class="fa-regular fa-clock"></i>
+                                <span>Ждет оценки</span>
+                            </div>
+                        }
+                    }
+                    else if (reviewRequest.IsOwn)
+                    {
+                        if (reviewResponse.Status == ReviewResponseStatus.Submitted)
+                        {
+                            <div class="buttons">
+                                <button class="save-btn" @onclick="async () => await SaveReviewResponse(ReviewResponseStatus.Accepted)">
+                                    <i class="fa-solid fa-check" style="font-size : 18px;"></i>
+                                    Принять
+                                </button>
 
-                            <button class="delete-btn" @onclick="DeleteReviewResponse">
-                                <i class="fa-solid fa-trash"></i>
-                                Удалить
-                            </button>
+                                <button class="delete-btn" @onclick="async () => await SaveReviewResponse(ReviewResponseStatus.Rejected)">
+                                    <i class="fa-solid fa-xmark" style="font-size : 18px;"></i>
+                                    Отклонить
+                                </button>
+                            </div>
+                        }
+                    }
 
-                            
+                    @if (reviewResponse.Status == ReviewResponseStatus.Accepted)
+                    {
+                        <div class="status-banner accepted">
+                            <i class="fa-solid fa-check"></i>
+                            <span>Принято</span>
+                        </div>
+                    }
+                    else if (reviewResponse.Status == ReviewResponseStatus.Rejected)
+                    {
+                        <div class="status-banner rejected">
+                            <i class="fa-solid fa-xmark"></i>
+                            <span>Отклонено</span>
                         </div>
                     }
 
@@ -196,40 +234,49 @@
             <div class="review-evaluation">
 
                 <!-- CODE RATING -->
-                <div class="evaluation-block">
+                @if (reviewResponse.Status != ReviewResponseStatus.InProgress
+                    && (!string.IsNullOrWhiteSpace(reviewResponse.Summary)
+                        || reviewResponse.CodeRating != null
+                        || (reviewResponse.IsOwn && reviewResponse.Status == ReviewResponseStatus.InProgress)))
+                {
+                    <div class="evaluation-block">
 
-                    <div class="evaluation-label">Оценка кода</div>
+                        <div class="evaluation-label">Оценка кода</div>
 
-                    <div class="rating-row">
-                        @for (int i = 1; i <= 5; i++)
-                        {
-                            var rating = i;
+                        <div class="rating-row">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                var rating = i;
 
-                            <button class="rating-btn @(reviewResponse.CodeRating == i ? "active" : "")"
-                                    @onclick="() => SetCodeRating(rating)">
-                                @i
-                            </button>
-                        }
-                    </div>
-
-                    @if (reviewResponse.IsOwn && reviewResponse.Status == ReviewResponseStatus.InProgress)
-                    {
-                        <textarea class="evaluation-textarea"
-                                  placeholder="Комментарий по коду..."
-                                  @bind="reviewResponse.Summary"></textarea>
-                    }
-                    else if (!string.IsNullOrWhiteSpace(reviewResponse.Summary))
-                    {
-                        <div class="evaluation-readonly">
-                            @reviewResponse.Summary
+                                <button class="rating-btn @(reviewResponse.CodeRating == i ? "active" : "")"
+                                        @onclick="() => SetCodeRating(rating)">
+                                    @i
+                                </button>
+                            }
                         </div>
-                    }
+
+                        @if (reviewResponse.IsOwn && reviewResponse.Status == ReviewResponseStatus.InProgress)
+                        {
+                            <textarea class="evaluation-textarea"
+                                      placeholder="Комментарий по коду..."
+                                      @bind="reviewResponse.Summary"></textarea>
+                        }
+                        else if (!string.IsNullOrWhiteSpace(reviewResponse.Summary))
+                        {
+                            <div class="evaluation-readonly">
+                                @reviewResponse.Summary
+                            </div>
+                        }
 
                     
-                </div>
+                    </div>
+                }
 
                 <!-- REVIEW RATING -->
-                @if (reviewResponse.Status != ReviewResponseStatus.InProgress)
+                @if (reviewResponse.Status != ReviewResponseStatus.InProgress
+                && (!string.IsNullOrWhiteSpace(reviewResponse.ReviewFeedback)
+                    || reviewResponse.ReviewRating != null
+                    || (reviewRequest.IsOwn && reviewResponse.Status == ReviewResponseStatus.Submitted)))
                 {
                     <div class="evaluation-block">
 
@@ -241,12 +288,12 @@
                                 var rating = i;
 
                                 <button class="rating-btn @(reviewResponse.ReviewRating == i ? "active" : "")"
-                                        @onclick="() => SetCodeRating(rating)">
+                                        @onclick="() => SetReviewRating(rating)">
                                     @i
                                 </button>
                             }
                         </div>
-                        @if (reviewRequest.IsOwn)
+                        @if (reviewRequest.IsOwn && reviewResponse.Status == ReviewResponseStatus.Submitted)
                         {
                             <textarea class="evaluation-textarea"
                                       placeholder="Обратная связь по ревью..."
@@ -295,17 +342,23 @@
         }
     }
 
-    private async Task SaveReviewResponse()
+    private async Task SaveReviewResponse(ReviewResponseStatus status = ReviewResponseStatus.InProgress)
     {
         var updateDto = new UpdateReviewResponseDto()
-            {
-                CodeRating = reviewResponse?.CodeRating,
-                Summary = reviewResponse?.Summary,
-                ReviewRating = reviewResponse?.ReviewRating,
-                ReviewFeedback = reviewResponse?.ReviewFeedback
-            };
+        {
+            CodeRating = reviewResponse?.CodeRating,
+            Summary = reviewResponse?.Summary,
+            ReviewRating = reviewResponse?.ReviewRating,
+            ReviewFeedback = reviewResponse?.ReviewFeedback,
+            Status = status
+        };
 
-        var success = await ReviewResponseService.UpdateReviewResponseAsync(reviewResponse?.Id, updateDto);
+        var updatedDto = await ReviewResponseService.UpdateResponseAsync(reviewResponse?.Id, updateDto);
+
+        if (updatedDto != null)
+        {
+            reviewResponse = updatedDto;
+        }
     }
 
     private async Task DeleteReviewResponse()
@@ -314,7 +367,7 @@
             return;
 
         var success = await ReviewResponseService
-            .DeleteReviewResponseAsync(reviewResponse.Id);
+            .DeleteResponseAsync(reviewResponse.Id);
 
         if (success)
         {
@@ -340,7 +393,7 @@
     {
         await base.OnInitializedAsync();
 
-        reviewResponse = await ReviewResponseService.GetReviewResponseAsync(Id.ToString());
+        reviewResponse = await ReviewResponseService.GetResponseAsync(Id.ToString());
 
         if (reviewResponse == null)
         {

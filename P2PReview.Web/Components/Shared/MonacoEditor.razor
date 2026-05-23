@@ -72,11 +72,19 @@
         {
             _previousValue = Value;
 
-            await JS.InvokeVoidAsync(
+            try
+            {
+                await JS.InvokeVoidAsync(
                 "monacoInterop.setValue",
                 _editorId,
-                Value
-            );
+                Value);
+            }
+            catch
+            {
+
+            }
+
+            
         }
     }
 
@@ -91,7 +99,9 @@
 
             _objRef = DotNetObjectReference.Create(this);
 
-            await JS.InvokeVoidAsync(
+            try
+            {
+                await JS.InvokeVoidAsync(
                 "monacoInterop.init",
                 _editorId,
                 language,
@@ -101,6 +111,12 @@
                 ReadOnly,
                 _objRef
             );
+            }
+            catch
+            {
+
+            }
+            
         }
     }
 

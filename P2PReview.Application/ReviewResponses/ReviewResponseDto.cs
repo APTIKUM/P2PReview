@@ -18,6 +18,7 @@ namespace P2PReview.Application.ReviewResponses
 
         public int? ReviewRating { get; set; }
         public string? ReviewFeedback { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         public bool IsOwn { get; set; }
 
@@ -38,6 +39,7 @@ namespace P2PReview.Application.ReviewResponses
             Summary = request.Summary;
             ReviewRating = request.ReviewRating;
             ReviewFeedback = request.ReviewFeedback;
+            CreatedAt = request.CreatedAt;
 
             Comments = request.Comments.Select(x => new ReviewResponseCommentDto(x))
                 .ToList();

@@ -46,22 +46,34 @@
                         </div>
 
                     </div>
+                    <div class="buttons">
+                        @if (reviewRequest.IsOwn)
+                        {
+                            
+                            int index = 1;
+                            foreach (var response in responses.Where(r => r.Status == ReviewResponseStatus.Submitted))
+                            {
+                                var id = response.Id;
 
-                    @if (reviewRequest.IsOwn)
-                    {
-                        <button class="delete-btn" @onclick="DeleteReviewRequest">
-                            <i class="fa-solid fa-trash"></i>
-                            Удалить
-                        </button>
-                    }
-                    else
-                    {
-                        <button class="review-btn" @onclick="CreateReviewResponse">
-                            <i class="fa-solid fa-pen"></i>
-                            Начать ревью
-                        </button>
-                    }
+                                <button class="@($"review-btn-{index}")" @onclick="() => OpenResponsePage(id)">
+                                    Ревью @index
+                                </button>
+                                index++;
+                            }
 
+                            <button class="delete-btn" @onclick="DeleteReviewRequest">
+                                <i class="fa-solid fa-trash"></i>
+                                Удалить
+                            </button>
+                        }
+                        else
+                        {
+                            <button class="review-btn" @onclick="CreateReviewResponse">
+                                <i class="fa-solid fa-pen"></i>
+                                Начать ревью
+                            </button>
+                        }
+                    </div>
                 </div>
 
                 <!-- BOTTOM ROW -->
@@ -209,6 +221,8 @@
 
     // private string pasteCodeContent = string.Empty;
 
+    private ICollection<ReviewResponseDto> responses;
+
     private CodeLanguage selectedLanguage = CodeLanguage.PlainText;
 
     private async Task DeleteReviewRequest()
@@ -242,13 +256,18 @@
 
     private async Task CreateReviewResponse()
     {
-        var id = await ReviewResponseService.CreateReviewResponseAsync(
+        var id = await ReviewResponseService.CreateResponseAsync(
             new CreateReviewResponseDto() { ReviewRequestId = reviewRequest.Id });
 
         if (id != null)
         {
             Nav.NavigateTo($"/review/response/{id}", forceLoad: true);
         }
+    }
+
+    private async Task OpenResponsePage(string id)
+    {
+        Nav.NavigateTo($"/review/response/{id}", forceLoad: true);
     }
 
 
@@ -262,6 +281,12 @@
             reviewRequest.Files.Any())
         {
             SelectFile(reviewRequest.Files.First());
+        }
+
+        if (reviewRequest != null)
+        {
+            responses = await ReviewResponseService.GetResponsesByRequestIdAsync(reviewRequest.Id)
+                ?? new List<ReviewResponseDto>();
         }
     }
 }

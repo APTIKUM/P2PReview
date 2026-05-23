@@ -60,10 +60,38 @@
     width: 100%;
 }
 
+/* STATUS */
 
+.status-banner {
+    border: none;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    font-size: 14px;
+}
+
+    .status-banner.submitted {
+        background: #FFFBE5;
+        color: #B9A500;
+    }
+
+    .status-banner.accepted {
+        background: #EAFBF1;
+        color: #16A34A;
+    }
+
+    .status-banner.rejected {
+        background: #FFEAEA;
+        color: #D9534F;
+    }
 
 /* REVIEW BTN*/
-.buttons{
+.buttons {
     display: flex;
     gap: 16px;
 }
@@ -81,7 +109,6 @@
         gap: 8px;
         white-space: nowrap;
     }
-/* DELETE */
 
 .delete-btn {
     background: #FFEAEA;
@@ -94,10 +121,8 @@
     }
 
 .save-btn {
-    
     background: #EAFBF1;
     color: #16A34A;
-    
 }
 
     .save-btn:hover {
@@ -107,7 +132,7 @@
 
 .submit-btn {
     background: #EEF1FF;
-    color: #808FEa;
+    color: #6C63FF;
 }
 
     .submit-btn:hover {
@@ -280,7 +305,7 @@
 
 .difficulty-0 {
     background: #EEF0FF;
-    color: #5D6BC0;
+    color: #6C63FF;
 }
 
 .difficulty-1 {
@@ -332,7 +357,7 @@
     font-size: 18px;
 }
 
-/*    .rating-btn:hover {
+    /*    .rating-btn:hover {
         transform: translateY(-2px);
         border-color: #808FEA;
         color: #808FEA;

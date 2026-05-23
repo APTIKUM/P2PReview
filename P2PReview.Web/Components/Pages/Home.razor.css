@@ -107,13 +107,13 @@
 .difficulty {
     padding: 4px 10px;
     border-radius: 999px;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
 }
 
 .difficulty-0 {
     background: #EEF0FF;
-    color: #5D6BC0;
+    color: #6C63FF;
 }
 
 .difficulty-1 {

@@ -60,51 +60,85 @@
     width: 100%;
 }
 
-/* DELETE */
-
-.delete-btn {
-    border: none;
-    background: #FFEAEA;
-    color: #D9534F;
-    padding: 12px 18px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: 0.2s ease;
+/* BTN*/
+.buttons {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
+    gap: 16px;
 }
 
-    .delete-btn:hover {
-        transform: translateY(-2px);
-        background: #ffdede;
+    .buttons button {
+        border: none;
+        padding: 12px 18px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        white-space: nowrap;
     }
 
-/* REVIEW BTN*/
+        .buttons button:hover {
+            transform: translateY(-2px);
+        }
 
 .review-btn {
-    border: none;
     background: #EAFBF1;
     color: #16A34A;
-    padding: 12px 18px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: 0.2s ease;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
 }
 
     .review-btn:hover {
-        transform: translateY(-2px);
         background: #dcfce7;
     }
+
+.delete-btn {
+    background: #FFEAEA;
+    color: #D9534F;
+}
+
+    .delete-btn:hover {
+        background: #ffdede;
+    }
+
+.review-btn-1 {
+    background: #EAFBF1;
+    color: #16A34A;
+}
+
+    .review-btn-1:hover {
+        background: #dcfce7;
+    }
+
+.review-btn-2 {
+    background: #EEF1FF;
+    color: #808FEa;
+}
+
+    .review-btn-2:hover {
+        background: #E0E6FF;
+    }
+
+.review-btn-3 {
+    background: #FFF5F0;
+    color: #F59E0B;
+}
+
+    .review-btn-3:hover {
+        background: #FFEFE5;
+    }
+
+.review-btn-4 {
+    background: #F0F9FF;
+    color: #38BDF8;
+}
+
+    .review-btn-4:hover {
+        transform: translateY(-2px);
+        background: #E1F3FE;
+    }
+
 
 /* META */
 

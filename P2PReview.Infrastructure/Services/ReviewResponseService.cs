@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using P2PReview.Application.Interfaces;
+using P2PReview.Application.ReviewRequests;
 using P2PReview.Application.ReviewResponses;
 using P2PReview.Domain.Entities;
 
@@ -20,7 +21,7 @@ namespace P2PReview.Infrastructure.Services
             _reviewRequestService = reviewRequestService;
         }
 
-        public async Task<string?> CreateReviewResponseAsync(CreateReviewResponseDto createDto)
+        public async Task<string?> CreateResponseAsync(CreateReviewResponseDto createDto)
         {
             var authId = await _userService.GetAuthUserId();
 
@@ -39,7 +40,8 @@ namespace P2PReview.Infrastructure.Services
             {
                 Id = Guid.NewGuid().ToString(),
                 UserId = authId,
-                ReviewRequestId = createDto.ReviewRequestId
+                ReviewRequestId = createDto.ReviewRequestId,
+                CreatedAt = DateTime.UtcNow,
             };
 
             await _context.ReviewResponses.AddAsync(reviewResponse);
@@ -49,7 +51,7 @@ namespace P2PReview.Infrastructure.Services
             return reviewResponse.Id;
         }
 
-        public async Task<bool> DeleteReviewResponseAsync(string id)
+        public async Task<bool> DeleteResponseAsync(string id)
         {
             var authId = await _userService.GetAuthUserId();
 
@@ -65,7 +67,7 @@ namespace P2PReview.Infrastructure.Services
             return deletedCount > 0;
         }
 
-        public async Task<ReviewResponseDto?> GetReviewResponseAsync(string id)
+        public async Task<ReviewResponseDto?> GetResponseAsync(string id)
         {
             var authId = await _userService.GetAuthUserId();
 
@@ -86,7 +88,25 @@ namespace P2PReview.Infrastructure.Services
 
         }
 
-        public async Task<ReviewResponseDto?> UpdateReviewResponseAsync(string id, UpdateReviewResponseDto updateDto)
+        public async Task<ICollection<ReviewResponseDto>?> GetResponsesByRequestIdAsync(string requestId)
+        {
+            return await _context.ReviewResponses
+                .Where(x => x.ReviewRequestId == requestId)
+                .OrderByDescending(x => x.CreatedAt)
+                .Select(x => new ReviewResponseDto(x))
+                .ToListAsync();
+        }
+
+        public async Task<ICollection<ReviewResponseDto>?> GetUserResponsesAsync(string userId)
+        {
+            return await _context.ReviewResponses
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.CreatedAt)
+                .Select(x => new ReviewResponseDto(x))
+                .ToListAsync();
+        }
+
+        public async Task<ReviewResponseDto?> UpdateResponseAsync(string id, UpdateReviewResponseDto updateDto)
         {
             var authId = await _userService.GetAuthUserId();
 
@@ -97,11 +117,20 @@ namespace P2PReview.Infrastructure.Services
 
             var reviewResponse = await _context.ReviewResponses
                 .Include(x => x.Comments)
-                .FirstOrDefaultAsync(x => x.Id == id && x.UserId == authId);
+                .FirstOrDefaultAsync(x => x.Id == id);
 
             if (reviewResponse == null)
+            {
                 return null;
+            }
 
+            var reviewRequest = await _reviewRequestService.GetReviewRequestAsync(reviewResponse.ReviewRequestId);
+
+            if (reviewResponse.UserId != authId && reviewRequest?.UserId != authId)
+            {
+                return null;
+            }
+            
             // update fields
             reviewResponse.Status = updateDto.Status ?? reviewResponse.Status;
 

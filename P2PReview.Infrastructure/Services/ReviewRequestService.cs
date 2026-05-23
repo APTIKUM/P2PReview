@@ -102,13 +102,8 @@ namespace P2PReview.Infrastructure.Services
                 return null;
             }
 
-            return await _context.ReviewRequests
-                .Where(x => x.UserId == authId)
-                .OrderByDescending(x => x.CreatedAt)
-                .Select(x => new ReviewRequestDto(x))
-                .ToListAsync();
+            return await GetUserReviewRequestAsync(authId);
         }
-
         public async Task<ReviewRequestDto?> GetReviewRequestAsync(string id)
         {
 
@@ -134,6 +129,15 @@ namespace P2PReview.Infrastructure.Services
                     Content = f.Content
                 })]
             };
+        }
+
+        public async Task<ICollection<ReviewRequestDto>?> GetUserReviewRequestAsync(string userId)
+        {
+            return await _context.ReviewRequests
+                .Where(x => x.UserId == userId)
+                .OrderByDescending(x => x.CreatedAt)
+                .Select(x => new ReviewRequestDto(x))
+                .ToListAsync();
         }
     }
 }

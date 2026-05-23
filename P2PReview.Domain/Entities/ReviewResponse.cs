@@ -19,6 +19,7 @@ namespace P2PReview.Domain.Entities
 
         public int? ReviewRating { get; set; }
         public string? ReviewFeedback { get; set; }
+        public DateTime CreatedAt { get; set; }
 
         public ICollection<ReviewResponseComment> Comments { get; set; } = new List<ReviewResponseComment>();
     }
