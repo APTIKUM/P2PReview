@@ -10,5 +10,6 @@ namespace P2PReview.Domain.Entities
         public ReviewResponseCommentType Type { get; set; }
         public string Content { get; set; }
         public int Line { get; set; }
+        public DateTime CreatedAt { get; set; }
     }
 }

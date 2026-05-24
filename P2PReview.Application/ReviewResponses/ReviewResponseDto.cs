@@ -22,7 +22,7 @@ namespace P2PReview.Application.ReviewResponses
 
         public bool IsOwn { get; set; }
 
-        public ICollection<ReviewResponseCommentDto> Comments { get; set; } = new List<ReviewResponseCommentDto>();
+        public List<ReviewResponseCommentDto> Comments { get; set; } = new List<ReviewResponseCommentDto>();
 
         public ReviewResponseDto()
         {
