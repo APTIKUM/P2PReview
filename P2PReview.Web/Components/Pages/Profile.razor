@@ -78,26 +78,25 @@
 
                 <div class="legend">
 
-                    <div class="row">
+                    <div class="description-container difficulty-0">
                         <div class="description">
                             <span class="dot easy"></span>
-                            easy
+                            Простые
                         </div>
                         <div class="value">@(profile?.ReviewsEasy ?? 0)</div>
                     </div>
 
-                    <div class="row">
+                    <div class="description-container difficulty-1">
                         <div class="description">
                             <span class="dot normal"></span>
-                            normal
+                            Средние
                         </div>
                         <div class="value">@(profile?.ReviewsNormal ?? 0)</div>
                     </div>
 
-                    <div class="row">
+                    <div class="description-container difficulty-2">
                         <div class="description">
-                            <span class="dot hard"></span>
-                            hard
+                            Сложные
                         </div>
                         <div class="value">@(profile?.ReviewsHard ?? 0)</div>
                     </div>
@@ -367,9 +366,9 @@
 
             return
                 $"background: conic-gradient(" +
-                $"#5D6BC0 0deg {eEnd}deg, " +
-                $"#CECB7D {eEnd}deg {nEnd}deg, " +
-                $"#DF7572 {nEnd}deg 360deg);";
+                $"#6C63FF 0deg {eEnd}deg, " +
+                $"#B9A500 {eEnd}deg {nEnd}deg, " +
+                $"#D9534F {nEnd}deg 360deg);";
         }
     }
 

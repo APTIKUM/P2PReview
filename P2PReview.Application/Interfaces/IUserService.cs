@@ -11,5 +11,7 @@ namespace P2PReview.Application.Interfaces
         public Task<UserProfileDto> UpdateUserProfileAsync(string userId, UpdateUserProfileDto updateUserProfileDto);
 
         public Task<(IList<UserProfileDto> leaders, int authPlace)> GetLeaderBoardAsync();
+
+        public Task<bool> UpdateUserStatsAsync(string userId, int? reviewGrade, int requestDifficulty, bool isAccepted);
     }
 }

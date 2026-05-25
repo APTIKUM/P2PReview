@@ -377,6 +377,8 @@
     resize: vertical;
     font-size: 16px;
     outline: none;
+    font-weight: 600;
+    color: #323E5A;
     font-family: 'Inter', sans-serif;
 }
 

@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using P2PReview.Application.Interfaces;
@@ -106,6 +107,80 @@ namespace P2PReview.Infrastructure.Services
             await _userManager.UpdateAsync(user);
 
             return new UserProfileDto(user);
+        }
+
+        public async Task<bool> UpdateUserStatsAsync(string userId, int? reviewGrade, int requestDifficulty, bool isAccepted)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            var score = CalculateQualityScoreDelta(reviewGrade, requestDifficulty, isAccepted);
+
+            user.QualityScore = Math.Clamp(user.QualityScore + score, 0 , int.MaxValue);
+
+            if (isAccepted) 
+            {
+                if (requestDifficulty == 0)
+                {
+                    user.ReviewsEasy++;
+                }
+                else if (requestDifficulty == 1)
+                {
+                    user.ReviewsNormal++;
+                }
+                else if (requestDifficulty == 2)
+                {
+                    user.ReviewsHard++;
+                }
+            }
+
+            await _userManager.UpdateAsync(user); 
+
+            return true;
+        }
+
+        private int CalculateQualityScoreDelta(int? reviewGrade, int requestDifficulty, bool isAccepted)
+        {
+            var baseScore = requestDifficulty switch
+            {
+                0 => 10,
+                1 => 20,
+                2 => 30,
+                _ => 10
+            };
+
+            var multiplier = reviewGrade switch
+            {
+                1 => 0.5,
+                2 => 0.7,
+                3 => 1.0,
+                4 => 1.2,
+                5 => 1.5,
+                _ => 0.5
+            };
+
+            var score = (int)Math.Round(baseScore * multiplier);
+
+            if (!isAccepted)
+            {
+                var penaltyMultiplier = reviewGrade switch
+                {
+                    5 => 0.0,
+                    4 => 0.0,
+                    3 => 0.3,
+                    2 => 0.6,
+                    1 => 1.0,
+                    _ => 0.0
+                };
+
+                score = -(int)Math.Round(baseScore * penaltyMultiplier);
+            }
+
+            return score;
         }
     }
 }

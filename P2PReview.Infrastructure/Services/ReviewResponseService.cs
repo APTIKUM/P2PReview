@@ -193,6 +193,16 @@ namespace P2PReview.Infrastructure.Services
 
             await CreateNotificationsHelper(updateDto.Status, reviewResponse, reviewRequest);
 
+
+            if (updateDto.Status == ReviewResponseStatus.Accepted || updateDto.Status == ReviewResponseStatus.Rejected)
+            {
+                await _userService.UpdateUserStatsAsync(reviewResponse.UserId,
+                reviewResponse.ReviewRating,
+                reviewRequest.Difficulty,
+                reviewResponse.Status == ReviewResponseStatus.Accepted);
+            }
+            
+
             return new ReviewResponseDto(reviewResponse);
         }
 

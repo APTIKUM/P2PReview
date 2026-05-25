@@ -76,8 +76,8 @@
 }
 
 .circle {
-    width: 100px;
-    height: 100px;
+    width: 115px;
+    height: 115px;
     border-radius: 50%;
     position: relative;
     display: flex;
@@ -88,8 +88,8 @@
     .circle::before {
         content: "";
         position: absolute;
-        width: 85px;
-        height: 85px;
+        width: 80%;
+        height: 80%;
         background: #fff;
         border-radius: 50%;
     }
@@ -119,45 +119,31 @@
     gap: 8px;
 }
 
-.row {
+.description-container {
     display: grid;
     grid-template-columns: 1fr auto;
     align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 14px;
+    font-weight: 600;
+    gap: 10px;
 }
 
 /* левая часть */
 .description {
     display: flex;
     align-items: center;
-    gap: 6px;
 }
 
 /* правая часть */
 .value {
+    font-size: 16px;
     font-weight: bold;
     text-align: right;
     white-space: nowrap;
 }
 
-/* точки */
-.dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    display: inline-block;
-}
-
-    .dot.easy {
-        background: #5D6BC0;
-    }
-
-    .dot.normal {
-        background: #CECB7D;
-    }
-
-    .dot.hard {
-        background: #DF7572;
-    }
 
 /*edit-icon*/
 .edit-icon {

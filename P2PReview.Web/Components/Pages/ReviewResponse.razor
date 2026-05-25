@@ -238,8 +238,7 @@
             <div class="review-evaluation">
 
                 <!-- CODE RATING -->
-                @if (reviewResponse.Status != ReviewResponseStatus.InProgress
-                    && (!string.IsNullOrWhiteSpace(reviewResponse.Summary)
+                @if ((!string.IsNullOrWhiteSpace(reviewResponse.Summary)
                         || reviewResponse.CodeRating != null
                         || (reviewResponse.IsOwn && reviewResponse.Status == ReviewResponseStatus.InProgress)))
                 {
