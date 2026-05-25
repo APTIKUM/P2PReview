@@ -1,4 +1,6 @@
-﻿@using P2PReview.Web.Components.Icons
+﻿@using P2PReview.Application.Interfaces
+@using P2PReview.Application.Notifications
+@using P2PReview.Web.Components.Icons
 @using P2PReview.Web.Services
 @using P2PReview.Web.State
 
@@ -7,6 +9,7 @@
 @inject NavigationManager Navigation
 @inject UserContext UserContext
 @inject AvatarUrlProvider AvatarUrlProvider
+@inject INotificationsService NotificationsService
 
 @implements IDisposable
 
@@ -26,9 +29,16 @@
             <div class="top-bar-links">
                 @if (UserContext.Profile != null)
                 {
-                    <div class="top-link notifications-icon">
+                    <div class="top-link notifications-icon"
+                         @onclick="ToggleNotifications">
                         <i class="fa-regular fa-bell"></i>
-                        @* <span class="badge">0</span> *@
+
+                        @if (UserContext.Notifications.Any(x => x.IsNew))
+                        {
+                            <span class="badge">
+                                @UserContext.Notifications.Count(x => x.IsNew)
+                            </span>
+                        }
                     </div>
 
                     <a href="/profile" class="top-link">
@@ -57,8 +67,84 @@
     </main>
 </div>
 
+@if (isNotificationsOpen)
+{
+    <div class="notifications-overlay" @onclick="CloseNotifications">
+
+        <div class="notifications-modal"
+             @onclick:stopPropagation="true">
+
+            <div class="notifications-header">
+                <h3>Уведомления</h3>
+
+                <button class="close-btn"
+                        @onclick="CloseNotifications">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="notifications-list">
+
+                @if (UserContext.Notifications.Count == 0)
+                {
+                    <div class="empty-notifications">
+                        Пусто :(
+                    </div>
+                }
+                else
+                {
+                    @foreach (var notification in UserContext.Notifications.OrderByDescending(x => x.CreatedAt))
+                    {
+                        var not = notification;
+                        
+                        <button @onclick="async () => await OpenNotification(not)"
+                           class="notification-item">
+
+                            <div class="notification-content">
+
+                                <div class="notification-title">
+                                    @notification.Title
+                                </div>
+
+                                <div class="notification-date">
+                                    @notification.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                                </div>
+
+                            </div>
+
+                        </button>
+                    }
+                }
+
+            </div>
+
+        </div>
+
+    </div>
+}
+
 
 @code {
+    private bool isNotificationsOpen;
+
+    private void ToggleNotifications()
+    {
+        isNotificationsOpen = !isNotificationsOpen;
+    }
+
+    private void CloseNotifications()
+    {
+        isNotificationsOpen = false;
+    }
+
+    private async Task OpenNotification(NotificationDto notificationDto)
+    {
+        Navigation.NavigateTo(notificationDto.Url, forceLoad: true);
+
+        await NotificationsService.ViewNotificationAsync(notificationDto.Id);
+    }
+
+
     protected override async Task OnInitializedAsync()
     {
         UserContext.OnChange -= HandleUserChanged;

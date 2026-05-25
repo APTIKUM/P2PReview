@@ -1,4 +1,5 @@
 ﻿using P2PReview.Application.Interfaces;
+using P2PReview.Application.Notifications;
 using P2PReview.Application.Users;
 
 namespace P2PReview.Web.State;
@@ -6,14 +7,17 @@ namespace P2PReview.Web.State;
 public class UserContext
 {
     private readonly IUserService _userService;
+    private readonly INotificationsService _notificationsService;
 
     public UserProfileDto? Profile { get; private set; }
+    public ICollection<NotificationDto> Notifications { get; private set; }
 
     public event Action? OnChange;
 
-    public UserContext(IUserService userService)
+    public UserContext(IUserService userService, INotificationsService notificationsService)
     {
         _userService = userService;
+        _notificationsService = notificationsService;
     }
 
     public async Task InitializeAsync()
@@ -21,6 +25,8 @@ public class UserContext
         if (Profile != null) return;
 
         Profile = await _userService.GetAuthProfileAsync();
+        Notifications = await _notificationsService.GetAuthNewNotificationsAsync();
+
         NotifyStateChanged();
     }
 

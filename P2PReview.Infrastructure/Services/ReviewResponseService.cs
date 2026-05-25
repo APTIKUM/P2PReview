@@ -1,7 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using P2PReview.Application.Interfaces;
+using P2PReview.Application.Notifications;
+using P2PReview.Application.ReviewRequests;
 using P2PReview.Application.ReviewResponses;
 using P2PReview.Domain.Entities;
+using P2PReview.Domain.Enums;
 
 namespace P2PReview.Infrastructure.Services
 {
@@ -10,14 +14,17 @@ namespace P2PReview.Infrastructure.Services
         private readonly AppDbContext _context;
         private readonly IUserService _userService;
         private readonly IReviewRequestService _reviewRequestService;
+        private readonly INotificationsService _notificationsService;
 
         public ReviewResponseService(IUserService userService,
             AppDbContext context,
-            IReviewRequestService reviewRequestService)
+            IReviewRequestService reviewRequestService,
+            INotificationsService notificationsService)
         {
             _userService = userService;
             _context = context;
             _reviewRequestService = reviewRequestService;
+            _notificationsService = notificationsService;
         }
 
         public async Task<string?> CreateResponseAsync(CreateReviewResponseDto createDto)
@@ -129,7 +136,7 @@ namespace P2PReview.Infrastructure.Services
             {
                 return null;
             }
-            
+
             // update fields
             reviewResponse.Status = updateDto.Status ?? reviewResponse.Status;
 
@@ -184,7 +191,50 @@ namespace P2PReview.Infrastructure.Services
 
             await _context.SaveChangesAsync();
 
+            await CreateNotificationsHelper(updateDto.Status, reviewResponse, reviewRequest);
+
             return new ReviewResponseDto(reviewResponse);
+        }
+
+        private async Task CreateNotificationsHelper(ReviewResponseStatus? newStatus, ReviewResponse reviewResponse, ReviewRequestDto reviewRequest)
+        {
+            try
+            {
+                if (newStatus == null 
+                    || newStatus == ReviewResponseStatus.InProgress)
+                {
+                    return;
+                }
+
+                var notification = new CreateNotificationDto();
+
+                if (newStatus == ReviewResponseStatus.Submitted)
+                {
+                    notification.Title = $"Новое ревью {reviewRequest.Name}";
+                    notification.Url = $"review/response/{reviewResponse.Id}";
+                    notification.UserId = $"{reviewRequest.UserId}";
+                }
+                else
+                {
+                    notification.Url = $"review/response/{reviewResponse.Id}";
+                    notification.UserId = $"{reviewResponse.UserId}";
+
+                    if (newStatus == ReviewResponseStatus.Accepted)
+                    {
+                        notification.Title = $"Принято ревью {reviewRequest.Name}";   
+                    }
+                    else if (newStatus == ReviewResponseStatus.Rejected)
+                    {
+                        notification.Title = $"Отклонено ревью {reviewRequest.Name}";
+                    }
+                }
+
+                await _notificationsService.CreateNotificationAsync(notification);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
     }
 }

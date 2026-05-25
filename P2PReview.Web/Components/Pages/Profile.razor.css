@@ -4,6 +4,8 @@
     gap: 24px;
     padding: 24px;
     color: #323E5A;
+
+    align-items: start;
 }
 
 /* LEFT CARD */

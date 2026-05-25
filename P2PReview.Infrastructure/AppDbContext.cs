@@ -15,6 +15,7 @@ namespace P2PReview.Infrastructure
         public DbSet<ReviewRequestFile> ReviewRequestFiles { get; set; }
         public DbSet<ReviewResponse> ReviewResponses { get; set; }
         public DbSet<ReviewResponseComment> ReviewResponseComments { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -48,6 +49,14 @@ namespace P2PReview.Infrastructure
                 .WithMany(r => r.Comments)
                 .HasForeignKey(x => x.ReviewResponseId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+
+            builder.Entity<Notification>()
+                .HasOne(n => n.User)
+                .WithMany(u => u.Notifications)
+                .HasForeignKey(n => n.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
         }
     }
 }

@@ -203,3 +203,126 @@ main {
     display: inline-block;
     background-color: #ffffff00;
 }
+
+/* OVERLAY */
+.notifications-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.35);
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    z-index: 2000;
+}
+
+/* MODAL */
+.notifications-modal {
+    width: 420px;
+    max-width: calc(100vw - 20px);
+    margin-top: 75px;
+    margin-right: 20px;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    animation: notifications-show 0.18s ease;
+}
+
+@keyframes notifications-show {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* HEADER */
+.notifications-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px;
+    border-bottom: 1px solid #eef1f6;
+}
+
+    .notifications-header h3 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+    }
+
+.close-btn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    transition: background 0.2s ease;
+    font-size: 18px;
+}
+
+    .close-btn:hover {
+        opacity: 0.8;
+    }
+
+/* notifications */
+.notifications-list {
+    max-height: 500px;
+    overflow-y: auto;
+    scrollbar-width: none;
+    color: #323E5A;
+    gap: 6px;
+}
+
+/* ITEM */
+.notification-item {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 16px 20px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    color: #323E5A;
+    transition: 0.2s ease;
+    cursor: pointer;
+}
+
+
+    .notification-item:hover {
+        background: #f1f2f7;
+    }
+
+.notification-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    min-width: 0;
+}
+
+.notification-title {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.notification-date {
+    font-size: 12px;
+    color: #6F8296;
+}
+
+.empty-notifications {
+    padding: 40px 20px;
+    text-align: center;
+    color: #6F8296;
+}
