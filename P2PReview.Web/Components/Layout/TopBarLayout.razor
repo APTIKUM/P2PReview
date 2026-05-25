@@ -36,7 +36,7 @@
                         @if (UserContext.Notifications.Any(x => x.IsNew))
                         {
                             <span class="badge">
-                                @UserContext.Notifications.Count(x => x.IsNew)
+                                @Math.Clamp(UserContext.Notifications.Count(x => x.IsNew), 0, 9)
                             </span>
                         }
                     </div>
