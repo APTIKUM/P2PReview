@@ -179,8 +179,8 @@
 
     .logout-icon:hover,
     .edit-icon:hover {
-        transform: scale(1.03);
-        color: #808FEA;
+        opacity: 0.8;
+/*        color: #808FEA;*/
     }
 
 /* RIGHT */
