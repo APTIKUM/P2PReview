@@ -113,6 +113,8 @@ main {
     z-index: 100;
     box-shadow: 0 4px 20px rgba(0,0,0,0.08);
     backdrop-filter: blur(6px);
+    min-height: 62px;
+    align-content: center;
 }
 
 .top-bar-content {
@@ -135,7 +137,7 @@ main {
 }
 
     .logo a:hover {
-        opacity: 0.85;
+        opacity: 0.8;
     }
 
 /* LINKS */
@@ -154,30 +156,25 @@ main {
     color: white;
     text-decoration: none;
     padding: 6px 12px;
-    border-radius: 16px;
+    border-radius: 9999px;
     transition: all 0.2s ease;
 }
 
     .top-link:hover {
-        background: rgba(255,255,255,0.15);
+        opacity: 0.8;
+    }
+
+    .top-link.avatar:hover {
+        opacity: 1;
     }
 
 /* NOTIFICATIONS */
 .notifications-icon {
     width: 36px;
     height: 36px;
-    display: flex;
-    align-items: center;
     justify-content: center;
     position: relative;
-    cursor: pointer;
-    border-radius: 16px;
-    transition: background 0.2s ease;
 }
-
-    .notifications-icon:hover {
-        background: rgba(255,255,255,0.15);
-    }
 
 .badge {
     position: absolute;

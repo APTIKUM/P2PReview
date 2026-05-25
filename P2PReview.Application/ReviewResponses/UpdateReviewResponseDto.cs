@@ -1,5 +1,4 @@
-﻿using P2PReview.Domain.Entities;
-using P2PReview.Domain.Enums;
+﻿using P2PReview.Domain.Enums;
 
 namespace P2PReview.Application.ReviewResponses
 {

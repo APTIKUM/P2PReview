@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using P2PReview.Application.Interfaces;
-using P2PReview.Application.ReviewRequests;
 using P2PReview.Application.ReviewResponses;
 using P2PReview.Domain.Entities;
 
