@@ -1,17 +1,106 @@
-﻿@using P2PReview.Domain.Enums
+﻿@using P2PReview.Application.ReviewResponses
+@using P2PReview.Domain.Enums
 
 @inject IJSRuntime JS
 @implements IAsyncDisposable
 
-<div id="@_editorId"
+<div class="monaco-wrapper"
      style="width:100%;
     min-height:@MinHeight;
     max-height:@MaxHeight;
     border-radius:@BorderRadius;
     overflow:hidden;">
+
+    <div id="@_editorId"
+         class="monaco-host">
+    </div>
+
+    @if (_modalOpen)
+    {
+        <div class="comment-panel">
+
+            <div class="comment-header">
+                <div class="comment-title">
+                    Строка @_currentComment?.Line
+                </div>
+
+                <button class="close-btn" @onclick="CloseModal">✕</button>
+            </div>
+
+            <div class="comment-body">
+
+
+                <textarea class="comment-textarea"
+                          placeholder="Введите комментарий..."
+                          @bind="_currentComment.Content"
+                          readonly="@(!_isEditMode)">
+                      </textarea>
+
+                
+                <div class="comment-types">
+                    <button type="button"
+                            class="comment-btn @(_currentComment.Type == ReviewResponseCommentType.Comment ? "active" : "")"
+                            @onclick="() => SetCommentType(ReviewResponseCommentType.Comment)">
+                        <i class="fa-regular fa-comment"></i>
+                        Комментарий
+                    </button>
+
+                    <button type="button"
+                            class="suggestion-btn @(_currentComment.Type == ReviewResponseCommentType.Suggestion ? "active" : "")"
+                            @onclick="() => SetCommentType(ReviewResponseCommentType.Suggestion)">
+                        <i class="fa-solid fa-lightbulb"></i>
+                        Предложение
+                    </button>
+
+                    <button type="button"
+                            class="issue-btn @(_currentComment.Type == ReviewResponseCommentType.Issue ? "active" : "")"
+                            @onclick="() => SetCommentType(ReviewResponseCommentType.Issue)">
+                        <i class="fa-solid fa-circle-exclamation"></i>
+                        Проблема
+                    </button>
+
+                    <button type="button"
+                            class="praise-btn @(_currentComment.Type == ReviewResponseCommentType.Praise ? "active" : "")"
+                            @onclick="() => SetCommentType(ReviewResponseCommentType.Praise)">
+                        <i class="fa-solid fa-thumbs-up"></i>
+                        Похвала
+                    </button>
+
+                </div>
+
+            </div>
+
+            @if (_isEditMode)
+            {
+                <div class="comment-footer">
+                    <button class="save-btn" @onclick="SaveComment">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Сохранить
+                    </button>
+
+                    <button class="delete-btn" @onclick="DeleteComment">
+                        <i class="fa-solid fa-trash"></i>
+                        Удалить
+                    </button>
+
+                </div>
+            }
+
+        </div>
+    }
+
 </div>
 
+
 @code {
+    [Parameter] public bool CanEditComments { get; set; } = false;
+
+    [Parameter] public List<ReviewResponseCommentDto> Comments { get; set; } = new();
+
+    [Parameter] public EventCallback<ReviewResponseCommentDto> CommentSaveHandle { get; set; }
+
+    [Parameter] public EventCallback<ReviewResponseCommentDto> CommentDeleteHandle { get; set; }
+
     [Parameter] public bool ReadOnly { get; set; } = false;
 
     [Parameter] public string Value { get; set; } = "";
@@ -31,6 +120,19 @@
     private bool _initialized;
     private string? _previousLanguage;
     private string? _previousValue;
+    private string? _previousCommentsHash;
+
+    private bool _modalOpen;
+    private ReviewResponseCommentDto? _currentComment;
+    private bool _isEditMode;
+
+    private void SetCommentType(ReviewResponseCommentType type)
+    {
+        if (!CanEditComments || _currentComment is null)
+            return;
+
+        _currentComment.Type = type;
+    }
 
     private string language => CodeLanguage switch
     {
@@ -51,6 +153,16 @@
         CodeLanguage.Json => "json",
         _ => "plaintext"
     };
+
+    private string GetCommentsHash()
+    {
+        if (Comments == null || Comments.Count == 0)
+            return "";
+
+        return string.Join("|", Comments
+            .OrderBy(x => x.Line)
+            .Select(x => $"{x.Line}:{x.Type}"));
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -79,12 +191,37 @@
                 _editorId,
                 Value);
             }
-            catch
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex);
             }
+        }
 
-            
+        var hash = GetCommentsHash();
+
+        if (_previousCommentsHash != hash)
+        {
+            _previousCommentsHash = hash;
+
+            await MarkComments();
+        }
+    }
+
+    public async Task MarkComments()
+    {
+        if (!_initialized)
+            return;
+
+        try
+        {
+            await JS.InvokeVoidAsync(
+                "monacoInterop.markComments",
+                _editorId,
+                Comments);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
         }
     }
 
@@ -110,14 +247,16 @@
                 MaxHeight,
                 ReadOnly,
                 _objRef
-            );
+                );
             }
-            catch
+            catch (Exception ex)
             {
-
+                Console.WriteLine(ex);
             }
-            
+
         }
+
+        await MarkComments();
     }
 
     [JSInvokable]
@@ -139,9 +278,119 @@
                 _editorId
             );
         }
-        catch
+        catch (Exception ex)
         {
-            // ignore prerender/navigation errors
+            Console.WriteLine(ex);
+        }
+    }
+
+    private Task OpenCommentModal(ReviewResponseCommentDto comment, bool isEdit)
+    {
+        _currentComment = new ReviewResponseCommentDto
+        {
+            Id = comment.Id,
+            Line = comment.Line,
+            Content = comment.Content,
+            ReviewResponseId = comment.ReviewResponseId,
+            Type = comment.Type,
+            CreatedAt = comment.CreatedAt
+        };
+
+        _isEditMode = isEdit;
+        _modalOpen = true;
+
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    private async Task DeleteComment()
+    {
+        if (_currentComment is null)
+            return;
+
+        await CommentDeleteHandle.InvokeAsync(_currentComment);
+
+        await MarkComments();
+
+        await CloseModal();
+    }
+
+    private async Task SaveComment()
+    {
+        if (_currentComment is null)
+            return;
+
+        if (string.IsNullOrWhiteSpace(_currentComment.Content))
+        {
+            await DeleteComment();
+            return;
+        }
+
+        await CommentSaveHandle.InvokeAsync(_currentComment);
+
+        await MarkComments();
+
+        await CloseModal();
+    }
+
+    private async Task CloseModal()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync(
+            "monacoInterop.highlightLine",
+            _editorId,
+            null);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        _modalOpen = false;
+    }
+
+
+    [JSInvokable]
+    public async Task OnLineClicked(int line)
+    {
+        try
+        {
+            await JS.InvokeVoidAsync(
+            "monacoInterop.highlightLine",
+            _editorId,
+            line);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        var existing = Comments?.FirstOrDefault(x => x.Line == line);
+
+        if (existing != null)
+        {
+            if (CanEditComments)
+            {
+                await OpenCommentModal(existing, isEdit: true);
+            }
+            else
+            {
+                await OpenCommentModal(existing, isEdit: false);
+            }
+        }
+        else
+        {
+            if (!CanEditComments)
+                return;
+
+            var newComment = new ReviewResponseCommentDto
+            {
+                Line = line,
+                Content = ""
+            };
+
+            await OpenCommentModal(newComment, isEdit: true);
         }
     }
 }

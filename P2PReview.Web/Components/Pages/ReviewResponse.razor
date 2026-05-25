@@ -52,7 +52,7 @@
                         if (reviewResponse.Status == ReviewResponseStatus.InProgress)
                         {
                             <div class="buttons">
-                                <button class="save-btn" @onclick="async () => await SaveReviewResponse()">
+                                <button class="save-btn" @onclick="async () => await SaveReviewResponse(ReviewResponseStatus.InProgress)">
                                     <i class="fa-solid fa-floppy-disk"></i>
                                     Сохранить
                                 </button>
@@ -215,7 +215,11 @@
                                           ReadOnly="true"
                                           MinHeight="644px"
                                           MaxHeight="644px"
-                                          BorderRadius="0px" />
+                                          BorderRadius="0px"
+                                          Comments="@selectedFileComments"
+                                          CanEditComments="@(reviewResponse.IsOwn && reviewResponse.Status == ReviewResponseStatus.InProgress)"
+                                          CommentSaveHandle="@OnCommentSaved" 
+                                          CommentDeleteHandle="@OnCommentDeleted"/>
 
                         </div>
 
@@ -320,11 +324,45 @@
     [Parameter]
     public Guid Id { get; set; }
 
+    private List<ReviewResponseCommentDto> selectedFileComments = new();
+
     private ReviewResponseDto? reviewResponse;
     private ReviewRequestDto? reviewRequest;
 
     private ReadedCodeFileDto? selectedFile;
     private CodeLanguage selectedLanguage = CodeLanguage.PlainText;
+
+    private async Task OnCommentSaved(ReviewResponseCommentDto comment)
+    {
+        var existing = reviewResponse.Comments.FirstOrDefault(x => x.Line == comment.Line 
+            && x.FileId == selectedFile.Id);
+
+        if (existing != null)
+        {
+            existing.Content = comment.Content;
+            existing.Type = comment.Type;
+        }
+        else
+        {
+            comment.FileId = selectedFile.Id;
+
+            reviewResponse.Comments.Add(comment);
+
+            selectedFileComments.Add(comment);
+        }
+    }
+
+    private async Task OnCommentDeleted(ReviewResponseCommentDto comment)
+    {
+        var existing = reviewResponse.Comments.FirstOrDefault(x => x.Line == comment.Line
+            && x.FileId == selectedFile.Id);
+
+        if (existing != null)
+        {
+            reviewResponse.Comments.Remove(existing);
+            selectedFileComments.Remove(existing);
+        }
+    }
 
     private async Task SetCodeRating(int rating)
     {
@@ -342,39 +380,6 @@
         }
     }
 
-    private async Task SaveReviewResponse(ReviewResponseStatus status = ReviewResponseStatus.InProgress)
-    {
-        var updateDto = new UpdateReviewResponseDto()
-        {
-            CodeRating = reviewResponse?.CodeRating,
-            Summary = reviewResponse?.Summary,
-            ReviewRating = reviewResponse?.ReviewRating,
-            ReviewFeedback = reviewResponse?.ReviewFeedback,
-            Status = status
-        };
-
-        var updatedDto = await ReviewResponseService.UpdateResponseAsync(reviewResponse?.Id, updateDto);
-
-        if (updatedDto != null)
-        {
-            reviewResponse = updatedDto;
-        }
-    }
-
-    private async Task DeleteReviewResponse()
-    {
-        if (reviewResponse == null)
-            return;
-
-        var success = await ReviewResponseService
-            .DeleteResponseAsync(reviewResponse.Id);
-
-        if (success)
-        {
-            Nav.NavigateTo("/", true);
-        }
-    }
-
     private void SelectFile(ReadedCodeFileDto file)
     {
         if (file == null)
@@ -385,6 +390,8 @@
         selectedFile = file;
 
         selectedLanguage = CodeLanguageExtensions.FromFileName(file.Name);
+
+        selectedFileComments = reviewResponse.Comments.Where(x => x.FileId == selectedFile.Id).ToList();
     }
 
 
@@ -406,6 +413,42 @@
             reviewRequest.Files.Any())
         {
             SelectFile(reviewRequest.Files.First());
+        }
+    }
+
+
+    private async Task SaveReviewResponse(ReviewResponseStatus status = ReviewResponseStatus.InProgress)
+    {
+        var updateDto = new UpdateReviewResponseDto()
+        {
+            CodeRating = reviewResponse?.CodeRating,
+            Summary = reviewResponse?.Summary,
+            ReviewRating = reviewResponse?.ReviewRating,
+            ReviewFeedback = reviewResponse?.ReviewFeedback,
+            Status = status,
+            Comments = reviewResponse?.Comments
+        };
+
+        var updatedDto = await ReviewResponseService.UpdateResponseAsync(reviewResponse?.Id, updateDto);
+
+        if (updatedDto != null)
+        {
+            updatedDto.IsOwn = reviewResponse.IsOwn;
+            reviewResponse = updatedDto;
+        }
+    }
+
+    private async Task DeleteReviewResponse()
+    {
+        if (reviewResponse == null)
+            return;
+
+        var success = await ReviewResponseService
+            .DeleteResponseAsync(reviewResponse.Id);
+
+        if (success)
+        {
+            Nav.NavigateTo("/", true);
         }
     }
 }

@@ -78,7 +78,7 @@
             automaticLayout: true,
             scrollBeyondLastLine: false,
             minimap: {
-                enabled: true
+                enabled: false
             },
             readOnly: readOnly
         });
@@ -120,6 +120,19 @@
                 value
             );
         });
+
+
+        editor.onMouseDown(function (e) {
+            if (!e.target || !e.target.position)
+                return;
+
+            const lineNumber = e.target.position.lineNumber;
+
+            dotnetRef.invokeMethodAsync(
+                "OnLineClicked",
+                lineNumber
+            );
+        });
     },
 
     setLanguage: function (id, language) {
@@ -156,5 +169,62 @@
 
             delete window.monacoInterop.editors[id];
         }
+    },
+
+    markComments: function (id, comments) {
+
+        const editor = window.monacoInterop.editors[id];
+
+        if (!editor)
+            return;
+
+        const decorations = (comments || []).map(c => ({
+            range: new monaco.Range(c.line, 1, c.line, 1),
+            options: {
+                isWholeLine: true,
+                className: "comment-line"
+            }
+        }));
+
+        if (!editor._commentDecorations)
+            editor._commentDecorations = [];
+
+        editor._commentDecorations = editor.deltaDecorations(
+            editor._commentDecorations,
+            decorations
+        );
+    },
+
+    highlightLine: function (id, line) {
+
+        const editor = window.monacoInterop.editors[id];
+
+        if (!editor)
+            return;
+
+        if (!line) {
+
+            editor._activeLineDecoration = editor.deltaDecorations(
+                editor._activeLineDecoration || [],
+                []
+            );
+
+            return;
+        }
+
+        const decoration = [{
+            range: new monaco.Range(line, 1, line, 1),
+            options: {
+                isWholeLine: true,
+                className: "active-line"
+            }
+        }];
+
+        editor._activeLineDecoration = editor.deltaDecorations(
+            editor._activeLineDecoration || [],
+            decoration
+        );
     }
+
+
 };

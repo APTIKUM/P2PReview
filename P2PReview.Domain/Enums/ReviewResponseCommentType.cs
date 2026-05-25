@@ -5,10 +5,6 @@
         Comment,
         Suggestion,
         Issue,
-        Nitpick,
-        Question,
-        Praise,
-        Security,
-        Performance 
+        Praise
     }
 }

@@ -6,6 +6,7 @@ namespace P2PReview.Domain.Entities
     {
         public string Id { get; set; }
         public string ReviewResponseId { get; set; }
+        public string FileId { get; set; }
         public ReviewResponse ReviewResponse { get; set; }
         public ReviewResponseCommentType Type { get; set; }
         public string Content { get; set; }

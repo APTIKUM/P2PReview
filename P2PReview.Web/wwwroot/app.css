@@ -76,3 +76,13 @@ h1:focus {
 .me-2 {
     margin-right: 0.5rem;
 }
+
+
+/* monaco */
+.comment-line {
+    background: rgba(255, 200, 0, 0.15) !important;
+}
+
+.active-line {
+    background: rgba(108, 99, 255, 0.18) !important;
+}

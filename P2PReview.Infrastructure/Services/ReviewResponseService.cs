@@ -142,7 +142,6 @@ namespace P2PReview.Infrastructure.Services
 
             if (updateDto.Comments != null)
             {
-                // remove deleted comments
                 var dtoCommentIds = updateDto.Comments
                     .Where(x => !string.IsNullOrWhiteSpace(x.Id))
                     .Select(x => x.Id)
@@ -157,7 +156,6 @@ namespace P2PReview.Infrastructure.Services
                     reviewResponse.Comments.Remove(comment);
                 }
 
-                // update/add comments
                 foreach (var commentDto in updateDto.Comments)
                 {
                     var existingComment = reviewResponse.Comments
@@ -165,29 +163,25 @@ namespace P2PReview.Infrastructure.Services
 
                     if (existingComment != null)
                     {
-                        // update existing
                         existingComment.Line = commentDto.Line;
                         existingComment.Type = commentDto.Type;
                         existingComment.Content = commentDto.Content;
                     }
                     else
                     {
-                        // add new
                         reviewResponse.Comments.Add(new ReviewResponseComment
                         {
                             Id = Guid.NewGuid().ToString(),
-
+                            FileId = commentDto.FileId,
                             ReviewResponseId = reviewResponse.Id,
-
                             Line = commentDto.Line,
                             Type = commentDto.Type,
-                            Content = commentDto.Content
+                            Content = commentDto.Content,
+                            CreatedAt = DateTime.UtcNow
                         });
                     }
                 }
             }
-
-            
 
             await _context.SaveChangesAsync();
 
