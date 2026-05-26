@@ -22,11 +22,14 @@
                 Открытые
             </button>
 
-            <button class="tab @(activeTab == Tabs.My ? "active" : "")"
-                    @onclick="() => SetTabOpen(Tabs.My)">
-                Мои запросы
-            </button>
-
+            @if(UserContext.Profile != null)
+            {
+                <button class="tab @(activeTab == Tabs.My ? "active" : "")"
+                        @onclick="() => SetTabOpen(Tabs.My)">
+                    Мои запросы
+                </button>
+            }
+            
             <button class="tab @(activeTab == Tabs.Archive ? "active" : "")"
                     @onclick="() => SetTabOpen(Tabs.Archive)">
                 База ревью
@@ -78,6 +81,12 @@
 
             </div>
         }
+        else
+        {
+            <div class="empty-state">
+                Пусто :(
+            </div>
+        }
 
         
     </div>
@@ -98,7 +107,14 @@
                 <a class="leader-card @(i + 1 == authLeaderPlace ? "auth" : "")" href=@($"profile/{leader.Id}")>
 
                     <div class="leader-place">
-                        #@(i + 1)
+                        @if (i == 0)
+                        {
+                            <i class="fa-solid fa-crown"></i>
+                        }
+                        else
+                        {
+                            <span>#@(i + 1)</span>
+                        }
                     </div>
 
                     <div class="leader-user">

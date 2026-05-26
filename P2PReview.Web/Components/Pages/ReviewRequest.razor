@@ -7,9 +7,11 @@
 @using P2PReview.Application.ReviewResponses
 @using P2PReview.Domain.Enums
 @using P2PReview.Web.Components.Shared
+@using P2PReview.Web.State
 
 @rendermode InteractiveServer
 
+@inject UserContext UserContext
 @inject IReviewRequestService ReviewRequestService
 @inject IReviewResponseService ReviewResponseService
 @inject NavigationManager Nav
@@ -66,7 +68,7 @@
                                 Удалить
                             </button>
                         }
-                        else
+                        else if (UserContext.Profile != null)
                         {
                             <button class="review-btn" @onclick="CreateReviewResponse">
                                 <i class="fa-solid fa-pen"></i>
@@ -274,6 +276,8 @@
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
+
+        await UserContext.InitializeAsync();
 
         reviewRequest = await ReviewRequestService.GetReviewRequestAsync(Id.ToString());
 

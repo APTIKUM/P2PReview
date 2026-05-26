@@ -42,6 +42,13 @@
 }
 
 /* REVIEW CARD */
+/* EMPTY */
+.empty-state {
+    padding: 40px;
+    text-align: center;
+    color: grey;
+    font-size: 18px;
+}
 
 .review-card {
     display: flex;
@@ -172,8 +179,8 @@
 
     .leader-card:hover {
         transform: translateY(-2px);
-        border-color: #DDE3FF;
-        background: #FCFDFF;
+        border-color: #808FEA;
+        /*        background: #FCFDFF;*/
     }
 
     /* CURRENT USER */
