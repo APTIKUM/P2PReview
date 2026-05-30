@@ -13,6 +13,21 @@ namespace P2PReview.Application.ReviewResponses
         public string Content { get; set; }
         public DateTime CreatedAt { get; set; }
 
+        public string TypeText
+        {
+            get
+            {
+                return Type switch
+                {
+                    ReviewResponseCommentType.Comment => "комментарий",
+                    ReviewResponseCommentType.Suggestion => "предложение",
+                    ReviewResponseCommentType.Issue => "баг",
+                    ReviewResponseCommentType.Praise => "похвала",
+                    _ => "комментарий"
+                };
+            }
+        }
+
         public ReviewResponseCommentDto()
         {
 
@@ -28,5 +43,7 @@ namespace P2PReview.Application.ReviewResponses
             CreatedAt = comment.CreatedAt;
             ReviewResponseId = comment.ReviewResponseId;
         }
+
+
     }
 }

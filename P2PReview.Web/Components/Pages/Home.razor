@@ -1,225 +1,375 @@
 ﻿@page "/"
 
-@using P2PReview.Application.ReviewRequests
-@using P2PReview.Application.Interfaces
-@using P2PReview.Web.State
+@using P2PReview.Application.ReviewRequests;
+@using P2PReview.Application.ReviewResponses;
+@using P2PReview.Domain.Enums;
+@using P2PReview.Web.Components.Shared
 
-@rendermode InteractiveServer
+@layout EmptyLayout
 
-@inject IReviewRequestService ReviewRequestService
-@inject IUserService UserService
-@inject UserContext UserContext
+@implements IDisposable
 
-<div class="home-page">
+<div class="market">
+    <header class="topbar">
+        <a class="logo" href="/">
+            P2P Review
+        </a>
+        <nav>
 
-    <!-- LEFT -->
-    <div class="reviews-panel">
+        </nav>
+        <a class="login" href="/login">Войти</a>
+    </header>
 
-        <div class="tabs">
+    <main class="content">
+        <section class="hero">
+            <section class="pitch">
+                <h1>Ревью кода, где ценится инженерная глубина, а не количество комментариев.</h1>
+                <p class="lead">
+                    Платформа распределяет ревью между разработчиками,
+                    подключает AI как дополнительного ревьюера
+                    и формирует рейтинг качества на основе полезности,
+                    глубины и принятых рекомендаций.
+                </p>
 
-            <button class="tab @(activeTab == Tabs.Open ? "active" : "")"
-                    @onclick="() => SetTabOpen(Tabs.Open)">
-                Открытые
-            </button>
-
-            @if(UserContext.Profile != null)
-            {
-                <button class="tab @(activeTab == Tabs.My ? "active" : "")"
-                        @onclick="() => SetTabOpen(Tabs.My)">
-                    Мои запросы
-                </button>
-            }
-            
-            <button class="tab @(activeTab == Tabs.Archive ? "active" : "")"
-                    @onclick="() => SetTabOpen(Tabs.Archive)">
-                База ревью
-            </button>
-
-        </div>
-
-
-        @if (activeTab != Tabs.Archive)
-        {
-            <div class="reviews-list">
-
-                @foreach (var review in reviewRequests)
-                {
-                    <a class="review-card" href="@($"/review/request/{review.Id}")" data-enhance-nav="false">
-
-                        <div class="review-header">
-                            <div class="review-title">
-                                @review.Name
-                            </div>
-
-                            <div class="difficulty difficulty-@review.Difficulty">
-                                @GetDifficulty(review.Difficulty)
-                            </div>
-                        </div>
-
-                        @if (!string.IsNullOrWhiteSpace(review.Description))
-                        {
-                            <div class="review-description">
-                                @(review.Description.Length <= 100 ? review.Description : review.Description.Substring(0, 100))
-                            </div>
-                        }
-
-                        <div class="review-footer">
-
-                          
-                            <div class="@(string.IsNullOrWhiteSpace(review.TechStack) ? "" : "review-tech")">
-                                @review.TechStack
-                            </div>
-
-                            
-                            <div class="review-deadline-label">
-                                @review.DeadlineLabel
-                            </div>
-                        </div>
-
-                    </a>
-                }
-
-            </div>
-        }
-        else
-        {
-            <div class="empty-state">
-                Пусто :(
-            </div>
-        }
-
-        
-    </div>
-
-    <!-- RIGHT -->
-    <div class="leaderboard-panel">
-
-        <div class="leaderboard-title">
-            Лидеры
-        </div>
-
-        <div class="leaderboard-list">
-
-            @for (int i = 0; i < leaders.Count; i++)
-            {
-                var leader = leaders[i];
-
-                <a class="leader-card @(i + 1 == authLeaderPlace ? "auth" : "")" href=@($"profile/{leader.Id}")>
-
-                    <div class="leader-place">
-                        @if (i == 0)
-                        {
-                            <i class="fa-solid fa-crown"></i>
-                        }
-                        else
-                        {
-                            <span>#@(i + 1)</span>
-                        }
-                    </div>
-
-                    <div class="leader-user">
-                        <div class="leader-name">
-                            @leader.UserName
-                        </div>
-                    </div>
-
-                    <div class="leader-xp">
-                        <i class="fa-solid fa-bolt"></i>
-                        <span>@leader.QualityScore</span>
-                    </div>
-
-                </a>
-            }
-
-            @if (authLeaderPlace > leaders.Count && UserContext.Profile != null)
-            {
-                <div class="leader-separator">
-                    ···
+                <div class="actions">
+                    <a class="btn primary" href="/profile">Опубликовать запрос</a>
                 </div>
 
-                var leader = UserContext.Profile;
+            </section>
 
-                <a class="leader-card auth" href=@($"profile/{leader.Id}")>
+            <section class="hero-showcase">
+                @if (_currentSlide == 0)
+                {
+                    <section class="info-card slide-in">
 
-                    <div class="leader-place">
-                        #@(authLeaderPlace)
-                    </div>
-
-                    <div class="leader-user">
-                        <div class="leader-name">
-                            @leader.UserName
+                        <div class="head">
+                            Запросы на ревью
                         </div>
-                    </div>
 
-                    <div class="leader-xp">
-                        <i class="fa-solid fa-bolt"></i>
-                        <span>@leader.QualityScore</span>
-                    </div>
+                        @foreach (var item in _requests)
+                        {
+                            <article class="task-card">
+                                <div>
+                                    <h3>@item.Name</h3>
+                                    <p>@item.Description</p>
 
-                </a>
-            }
+                                    <div class="tags">
+                                        @foreach (var tag in item.Tags)
+                                        {
+                                            <span class="tag">@tag</span>
+                                        }
+                                    </div>
+                                </div>
 
-        </div>
+                                <div class="difficulty">
+                                    <strong class="difficulty-@item.Difficulty">
+                                        @item.DifficultyLabel
+                                    </strong>
+                                </div>
+                            </article>
+                        }
 
-    </div>
+                    </section>
+                }
+                else if (_currentSlide == 1)
+                {
+                    <section class="info-card slide-in">
 
+                        <div class="head">
+                            Полный цикл ревью
+                            без лишней организационной работы
+                        </div>
+
+                        <div class="workflow">
+                            <article class="step">
+                                <span class="step-num">01</span>
+                                <div>
+                                    <h3>Загрузка решения</h3>
+                                    <p>
+                                        Создайте запрос на ревью, приложите ссылку на репозиторий github gitlab,
+                                        pull request или фрагмент кода для проверки.
+                                    </p>
+                                </div>
+                            </article>
+
+                            <article class="step">
+                                <span class="step-num">02</span>
+                                <div>
+                                    <h3>Распределение</h3>
+                                    <p>
+                                        Запрос автоматически назначается нескольким ревьюерам с подходящим
+                                        стеком. Алгоритм исключает self-review, учитывает нагрузку участников
+                                        и историю предыдущих проверок.
+                                    </p>
+                                </div>
+                            </article>
+
+                            <article class="step">
+                                <span class="step-num">03</span>
+                                <div>
+                                    <h3>Inline review</h3>
+                                    <p>
+                                        Ревьюеры оставляют комментарии к конкретным строкам кода,
+                                        предлагают улучшения архитектуры, безопасности и тестового покрытия,
+                                        а также формируют итоговое заключение.
+                                    </p>
+                                </div>
+                            </article>
+
+                            <article class="step">
+                                <span class="step-num">04</span>
+                                <div>
+                                    <h3>Оценка качества</h3>
+                                    <p>
+                                        AI анализирует полезность комментариев, их конкретность и глубину.
+                                        Принятые рекомендации влияют на рейтинг ревьюера и помогают выделять
+                                        сильных инженеров сообщества.
+                                    </p>
+                                </div>
+                            </article>
+                        </div>
+                    </section>
+                }
+                else if (_currentSlide == 2)
+                {
+                    <section class="info-card slide-in">
+
+                        <div class="head">
+                            Пример ревью
+                        </div>
+
+                        <div class="review-header">
+                            <div class="review-meta">
+                                <div class="file-name">Сервис оформления заказа: обработка оплаты</div>
+                                <div class="tags">
+                                    @foreach (var tag in _tagsMonaco)
+                                    {
+                                        <span class="tag">@tag</span>
+                                    }
+                                </div>
+                            </div>
+
+                            <div class="quality-box">
+                                <div class="quality-value">81</div>
+                                <div class="quality-label">AI RATING</div>
+                            </div>
+                        </div>
+
+                        
+
+                        <div class="review-body">
+
+                            <div class="editor-panel">
+                                <MonacoEditor @ref="_editor"
+                                              @bind-Value="_fileReview"
+                                              CodeLanguage="@CodeLanguage.CSharp"
+                                              ReadOnly="true"
+                                              Comments="@_comments" />
+                            </div>
+
+                            <aside class="comments-panel">
+                                @foreach (var comment in _comments)
+                                {
+                                    var line = comment.Line;
+
+                                    <div class="comment"
+                                         @onmouseenter="async () =>
+                                                                                                                           {
+                                                                                                                               await _editor!.HighlightLine(line);
+                                                                                                                           }">
+                                        <div class="comment-badge @GetCommentBadgeClass(comment.Type)">
+                                            @comment.TypeText
+                                        </div>
+
+                                        <div class="comment-text">
+                                            @comment.Content
+                                        </div>
+                                    </div>
+                                }
+                            </aside>
+
+                        </div>
+
+                    </section>
+                }
+
+                <div class="slider-nav">
+
+                    @for (var i = 0; i < _slidesCount; i++)
+                    {
+                        <div class="slider-segment">
+                            <div class="slider-segment-fill"
+                                 style="@GetSegmentStyle(i)">
+                            </div>
+                        </div>
+                    }
+
+                </div>
+
+            </section>
+        </section>
+    </main>
 </div>
 
 @code {
-
-    private Tabs activeTab = Tabs.Open;
-
-    private enum Tabs
+    private List<ReviewRequestDto> _requests = new()
     {
-        Open,
-        Archive,
-        My
-    }
-
-    private ICollection<ReviewRequestDto> reviewRequests = new List<ReviewRequestDto>();
-    private IList<UserProfileDto> leaders = new List<UserProfileDto>();
-    private int authLeaderPlace = 0;
-
-    private async Task SetTabOpen(Tabs tab)
-    {
-        if (tab == Tabs.Open)
+        new()
         {
-            reviewRequests = await ReviewRequestService.GetActiveReviewRequestAsync(10)
-                ?? new List<ReviewRequestDto>();
+            Name = "Payment service: race condition around capture",
+             Description = "Нужны замечания по транзакционности, повторным запросам и обработке финальных состояний",
+            Tags = new[] { "C#", "PostgreSQL", "Concurrency" },
+            Difficulty = 2
+        },
+
+        new()
+        {
+            Name = "React dashboard: component boundaries",
+             Description = "Проверить декомпозицию, изоляцию состояния и сценарии ошибок.",
+            Tags =   new[] { "React", "UX", "Architecture" },
+            Difficulty = 1
+        },
+
+        new()
+        {
+            Name = "API permissions refactor",
+             Description = "Ожидаются security-комментарии, edge cases и предложения по тестам.",
+            Tags =    new[] { "ASP.NET", "Security" },
+            Difficulty = 0
+        },
+
+        new()
+        {
+            Name = "Authentication flow: JWT refresh token rotation",
+            Description = "Проверить безопасность refresh-токенов, ротацию, отзыв сессий и защиту от replay-атак",
+            Tags = new[] { "ASP.NET", "Security", "JWT" },
+            Difficulty = 2
+        },
+
+    };
+
+    private List<ReviewResponseCommentDto> _comments = new()
+    {
+        new()
+        {
+            Content = @"bool не даёт информации о причине отказа (не найден / уже оплачен / ошибка платежа)
+
+                Лучше вернуть Result-объект или enum со статусами.",
+            Line = 5,
+            Type = ReviewResponseCommentType.Suggestion
+        },
+        new()
+        {
+            Content = @"Использование DateTime.Now может привести к проблемам с часовыми поясами и несогласованностью данных.
+
+Рекомендуется использовать DateTime.UtcNow.",
+            Line = 23,
+            Type = ReviewResponseCommentType.Issue
+        },
+        new()
+        {
+            Content = @"Отсутствует обработка ошибок SaveChangesAsync.
+
+        Если платёж уже выполнен, а сохранение в БД завершится ошибкой, система потеряет информацию об оплате и может попытаться списать средства повторно.",
+            Line = 25,
+            Type = ReviewResponseCommentType.Issue
         }
-        else if (tab == Tabs.My)
-        {
-            reviewRequests = await ReviewRequestService.GetAuthUserReviewRequestAsync()
-                ?? new List<ReviewRequestDto>();
-        }
+    };
 
-        activeTab = tab;
-    }
-
-    private string GetDifficulty(int difficulty)
+    private string GetCommentBadgeClass(ReviewResponseCommentType type)
     {
-        return difficulty switch
+
+        return type switch
         {
-            0 => "просто",
-            1 => "нормально",
-            2 => "сложно",
-            _ => ""
+            ReviewResponseCommentType.Comment => "difficulty-0",
+            ReviewResponseCommentType.Suggestion => "difficulty-1",
+            ReviewResponseCommentType.Issue => "difficulty-2",
+            ReviewResponseCommentType.Praise => "difficulty-0",
+            _ => "difficulty-0"
         };
     }
 
+    private string _fileReview = @"public class OrderService(
+    AppDbContext db,
+    IPaymentGateway paymentGateway)
+{
+    public async Task<bool> PayOrderAsync(Guid orderId)
+    {
+        var order = await db.Orders.FindAsync(orderId);
 
+        if (order is null || order.IsPaid)
+        {
+            return false;
+        }
+
+        var result = await paymentGateway
+            .ChargeAsync(order.Total);
+
+        if (!result.Success)
+        {
+            return false;
+        }
+
+        order.IsPaid = true;
+        order.PaidAt = DateTime.Now;
+
+        await db.SaveChangesAsync();
+        return true;
+    }
+}";
+
+    private string[] _tagsMonaco = new[] { "C#", "EF Core", "Payments", "Concurrency" };
+    private MonacoEditor? _editor;
+
+    private int _slidesCount = 3;
+
+    private int _currentSlide = 0;
+    private int _progress;
+
+    private string GetSegmentStyle(int index)
+    {
+        if (index < _currentSlide)
+            return "width:100%;";
+
+        if (index == _currentSlide)
+            return $"width:{_progress}%;";
+
+        return "width:0;";
+    }
 
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
-
-        await UserContext.InitializeAsync();
-
-        reviewRequests = await ReviewRequestService.GetActiveReviewRequestAsync(10)
-                    ?? new List<ReviewRequestDto>();
-
-        (leaders, authLeaderPlace) = await UserService.GetLeaderBoardAsync();
-
+        _ = RunSlider();
     }
 
+    private async Task RunSlider()
+    {
+        while (true)
+        {
+            _progress = 0;
+
+            while (_progress < 100)
+            {
+                await Task.Delay(50);
+
+                _progress++;
+
+                await InvokeAsync(StateHasChanged);
+            }
+
+            _progress = 0;
+
+            _currentSlide = (_currentSlide + 1) % _slidesCount;
+            // _currentSlide = 2;
+
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    public void Dispose()
+    {
+    }
+
+   
 }

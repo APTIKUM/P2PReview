@@ -51,8 +51,6 @@
         id,
         language,
         value,
-        minHeight,
-        maxHeight,
         readOnly,
         dotnetRef
     ) {
@@ -75,41 +73,48 @@
             value: value || "",
             language: language || "javascript",
             theme: "vs-dark",
+
             automaticLayout: true,
             scrollBeyondLastLine: false,
-            minimap: {
-                enabled: false
+            smoothScrolling: true,
+
+            fontSize: 14,
+            lineHeight: 20,
+            fontLigatures: true,
+
+            minimap: { enabled: false },
+            folding: false,
+            glyphMargin: false,
+
+            cursorBlinking: "smooth",
+            cursorSmoothCaretAnimation: "off",
+            cursorStyle: "line",
+
+            wordWrap: "off",
+            tabSize: 4,
+
+            renderLineHighlight: "line",
+            lineNumbers: "on",
+
+            scrollbar: {
+                vertical: "auto",
+                horizontal: "auto"
             },
+
+            padding: {
+                top: 8,
+                bottom: 8
+            },
+
             readOnly: readOnly
         });
 
         window.monacoInterop.editors[id] = editor;
 
-        const updateHeight = () => {
-
-            const contentHeight = editor.getContentHeight();
-
-            const min = parseInt(minHeight);
-            const max = parseInt(maxHeight);
-
-            const newHeight =
-                Math.min(Math.max(contentHeight, min), max);
-
-            container.style.height = `${newHeight}px`;
-
-            editor.layout();
-        };
-
-        updateHeight();
 
         setTimeout(() => {
             editor.layout();
-            updateHeight();
         }, 100);
-
-        editor.onDidContentSizeChange(() => {
-            updateHeight();
-        });
 
         editor.onDidChangeModelContent(async () => {
 
@@ -225,6 +230,4 @@
             decoration
         );
     }
-
-
 };

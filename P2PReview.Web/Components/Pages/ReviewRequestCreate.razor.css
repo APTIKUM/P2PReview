@@ -270,8 +270,6 @@ body {
 }
 
 .file-item {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
     padding: 10px 12px;
     border: 1px solid #E6E8F0;
@@ -279,10 +277,11 @@ body {
     background: white;
     font-size: 14px;
     color: #323E5A;
+    margin-top: 10px;
 }
 
 .file-content {
-    margin-top: 10px;
+
     padding: 12px;
     background: #0f172a;
     color: #e2e8f0;
@@ -297,12 +296,13 @@ body {
 
 .file-header {
     display: flex;
+    align-content: center;
     justify-content: space-between;
     font-weight: 600;
-    margin-bottom: 6px;
 }
 
 .remove-btn {
+    margin-left: auto;
     background: transparent;
     border: none;
     cursor: pointer;
@@ -310,7 +310,7 @@ body {
 }
 
     .remove-btn:hover {
-        color: #B42318;
+        opacity: 0.8;
     }
 
 /* =========================

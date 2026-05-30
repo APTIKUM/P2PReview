@@ -253,9 +253,12 @@
                                     @request.TechStack
                                 </div>
 
-                                <div class="review-deadline-label">
-                                    @request.DeadlineLabel
-                                </div>
+                                @if (response.Status == ReviewResponseStatus.InProgress)
+                                {
+                                    <div class="review-deadline-label">
+                                        @request.DeadlineLabel
+                                    </div>
+                                }
                             </div>
 
                         </a>

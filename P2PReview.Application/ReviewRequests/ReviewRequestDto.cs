@@ -16,6 +16,8 @@ namespace P2PReview.Application.ReviewRequests
         public int ReviewersCount { get; set; }
         public bool IsOwn { get; set; } = false;
 
+        public string[] Tags { get; set; }
+
         // да-да, надо вынести в отедльную dto для карточек , но мне лень, отвалите 🙄
         public string DeadlineLabel
         {
