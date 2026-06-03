@@ -11,72 +11,74 @@
 @layout EmptyLayout
 
 <div class="auth-container">
+
     <div class="auth-card">
-        <h2 class="auth-title">Вход в систему</h2>
+
+        @* <div class="auth-brand">
+            P2P Review
+        </div> *@
+
+        <h1 class="auth-title">
+            Вход в систему
+        </h1>
+
+        <p class="auth-subtitle">
+            Войдите в аккаунт, чтобы публиковать запросы на ревью и участвовать в проверках кода.
+        </p>
 
         <form method="post" action="/api/auth/login">
 
-            <!-- EMAIL -->
-            <div class="form-group">
-                <label class="form-label">Email</label>
+            <div class="field">
+                <label>Email</label>
 
-                <div class="input-with-icon">
-                    <i class="fas fa-envelope input-icon"></i>
-
-                    <input class="form-control"
-                           required
-                           name="Email"
-                           placeholder="Введите email"
-                           @bind="loginModel.Email"
-                           @oninput="ClearError"/>
-                </div>
+                <input class="input"
+                       required
+                       name="Email"
+                       placeholder="Введите email"
+                       @bind="loginModel.Email"
+                       @oninput="ClearError" />
             </div>
 
-            <!-- PASSWORD -->
-            <div class="form-group">
-                <label class="form-label">Пароль</label>
+            <div class="field">
 
-                <div class="input-with-icon">
-                    <i class="fas fa-lock input-icon"></i>
+                <div class="field-header">
+                    <label>Пароль</label>
 
-                    <input class="form-control"
+                    <a class="forgot-link">
+                        Забыли пароль?
+                    </a>
+                </div>
+
+                <div class="password-field">
+
+                    <input class="input"
                            required
                            name="Password"
                            placeholder="Введите пароль"
                            type="@(showPassword ? "text" : "password")"
-                           @bind="loginModel.Password" 
+                           @bind="loginModel.Password"
                            @oninput="ClearError" />
 
                     <button type="button"
                             class="password-toggle"
                             @onclick="TogglePassword">
-                        <i class="@(showPassword ? "fas fa-eye-slash" : "fas fa-eye")"></i>
+                        @(showPassword ? "Скрыть" : "Показать")
                     </button>
-                </div>
-                
-                <div class="password-hints">
-                    
-                    <span></span>
-                    <a class="forgot-link">Забыли пароль?</a>
+
                 </div>
 
-                <!-- SERVER ERROR -->
                 @if (!string.IsNullOrWhiteSpace(errorMessage))
                 {
-                    <div class="validation-message" style="text-align: left;">
+                    <div class="validation-message auth-error">
                         @errorMessage
                     </div>
                 }
 
             </div>
 
-
-
-            <!-- SUBMIT -->
-            <button type="submit" class="btn btn-primary btn-login">
+            <button type="submit" class="btn primary btn-login">
                 Войти
             </button>
-
 
         </form>
 
@@ -85,21 +87,26 @@
         </div>
 
         <div class="oauth-buttons">
-            <button class="btn btn-outline btn-oauth" disabled>
+
+            <button class="btn-oauth" disabled>
                 <i class="fab fa-github"></i>
                 Войти через GitHub
             </button>
 
-            <button class="btn btn-outline btn-oauth" disabled>
+            <button class="btn-oauth" disabled>
                 <i class="fab fa-gitlab"></i>
                 Войти через GitLab
             </button>
+
         </div>
 
         <div class="register-link">
-            Нет аккаунта? <a href="/register">Регистрация</a>
+            Нет аккаунта?
+            <a href="/register">Регистрация</a>
         </div>
+
     </div>
+
 </div>
 
 @code {

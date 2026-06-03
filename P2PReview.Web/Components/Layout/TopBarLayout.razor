@@ -16,55 +16,61 @@
 <PageTitle>P2P Review</PageTitle>
 
 <div class="app">
-    <header class="top-bar">
-        <div class="top-bar-content">
-            
-            <div class="logo">
-                <a href="/">
-                    <CodeBubbleIcon />
-                    <span>P2P Review</span>
+
+    <header class="topbar">
+
+        <a class="logo" href="/">
+            P2P Review
+        </a>
+
+        <nav></nav>
+
+        @if (UserContext.Profile != null)
+        {
+            <div class="topbar-actions">
+
+                <div class="notifications-trigger"
+                     @onclick="ToggleNotifications">
+
+                    <i class="fa-regular fa-bell"></i>
+
+                    @if (UserContext.Notifications.Any(x => x.IsNew))
+                    {
+                        <span class="badge">
+                            @Math.Clamp(
+                                UserContext.Notifications.Count(x => x.IsNew),
+                                0,
+                                9)
+                        </span>
+                    }
+
+                </div>
+
+                <a href="/profile" class="score-link">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>@(UserContext.Profile?.QualityScore ?? 0)</span>
                 </a>
+
+                <a href="/profile" class="profile-link">
+                    <img class="avatar-topbar"
+                         src="@AvatarUrlProvider.GetAvatarUrl(UserContext.Profile?.AvatarId)" />
+                </a>
+
             </div>
+        }
+        else
+        {
+            <a class="login" href="/login">
+                Войти
+            </a>
+        }
 
-            <div class="top-bar-links">
-                @if (UserContext.Profile != null)
-                {
-                    <div class="top-link notifications-icon"
-                         @onclick="ToggleNotifications">
-                        <i class="fa-regular fa-bell"></i>
-
-                        @if (UserContext.Notifications.Any(x => x.IsNew))
-                        {
-                            <span class="badge">
-                                @Math.Clamp(UserContext.Notifications.Count(x => x.IsNew), 0, 9)
-                            </span>
-                        }
-                    </div>
-
-                    <a href="/profile" class="top-link">
-                        <i class="fa-solid fa-bolt"></i>
-                        <span>@(UserContext.Profile?.QualityScore ?? 0)</span>
-                    </a>
-
-                    <a href="/profile" class="top-link avatar">
-                        <img class="avatar-topbar"
-                             src="@AvatarUrlProvider.GetAvatarUrl(UserContext.Profile?.AvatarId)" />
-                    </a>
-                }
-                else
-                {
-                    <a href="/login" class="top-link" style="font-size: 20px;">
-                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                    </a>
-                }
-            </div>
-
-        </div>
     </header>
 
     <main class="content">
         @Body
     </main>
+
 </div>
 
 @if (isNotificationsOpen)

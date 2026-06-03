@@ -213,13 +213,8 @@
                             <MonacoEditor @bind-Value="selectedFile?.Content"
                                           CodeLanguage="@selectedLanguage"
                                           ReadOnly="true"
-                                          MinHeight="644px"
-                                          MaxHeight="644px"
-                                          BorderRadius="0px"
-                                          Comments="@selectedFileComments"
-                                          CanEditComments="@(reviewResponse.IsOwn && reviewResponse.Status == ReviewResponseStatus.InProgress)"
-                                          CommentSaveHandle="@OnCommentSaved" 
-                                          CommentDeleteHandle="@OnCommentDeleted"/>
+                                          Comments="@selectedFileComments"/>
+                                          @* CanEditComments="@(reviewResponse.IsOwn && reviewResponse.Status == ReviewResponseStatus.InProgress)"/> *@
 
                         </div>
 

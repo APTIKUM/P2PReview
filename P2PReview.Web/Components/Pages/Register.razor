@@ -11,9 +11,20 @@
 @layout EmptyLayout
 
 <div class="auth-container">
+
     <div class="auth-card">
 
-        <h2 class="auth-title">Регистрация</h2>
+      @*   <div class="auth-brand">
+            P2P Review
+        </div> *@
+
+        <h1 class="auth-title">
+            Регистрация
+        </h1>
+
+        <p class="auth-subtitle">
+            Создайте аккаунт, чтобы публиковать запросы на ревью и получать обратную связь от сообщества.
+        </p>
 
         <EditForm Model="@registerModel"
                   OnValidSubmit="HandleRegister"
@@ -21,25 +32,22 @@
 
             <DataAnnotationsValidator />
 
-            <!-- EMAIL -->
-            <div class="form-group">
-                <label class="form-label">Email</label>
-                <div class="input-with-icon">
-                    <i class="fas fa-envelope input-icon"></i>
-                    <InputText class="form-control"
-                               @bind-Value="registerModel.Email"
-                               placeholder="Введите email" />
-                </div>
+            <div class="field">
+                <label>Email</label>
+
+                <InputText class="input"
+                           @bind-Value="registerModel.Email"
+                           placeholder="Введите email" />
+
                 <ValidationMessage For="@(() => registerModel.Email)" />
             </div>
 
-            <!-- PASSWORD -->
-            <div class="form-group">
-                <label class="form-label">Пароль</label>
-                <div class="input-with-icon">
-                    <i class="fas fa-lock input-icon"></i>
+            <div class="field">
+                <label>Пароль</label>
 
-                    <InputText class="form-control"
+                <div class="password-field">
+
+                    <InputText class="input"
                                type="@(showPassword ? "text" : "password")"
                                @bind-Value="registerModel.Password"
                                placeholder="Введите пароль" />
@@ -47,67 +55,56 @@
                     <button type="button"
                             class="password-toggle"
                             @onclick="TogglePassword">
-                        @if (showPassword)
-                        {
-                            <i class="fas fa-eye-slash"></i>
-                        }
-                        else
-                        {
-                            <i class="fas fa-eye"></i>
-                        }
+                        @(showPassword ? "Скрыть" : "Показать")
                     </button>
+
                 </div>
 
                 <ValidationMessage For="@(() => registerModel.Password)" />
             </div>
 
-            <!-- CONFIRM PASSWORD -->
-            <div class="form-group">
-                <label class="form-label">Подтверждение пароля</label>
-                <div class="input-with-icon">
-                    <i class="fas fa-lock input-icon"></i>
+            <div class="field">
+                <label>Подтверждение пароля</label>
 
-                    <InputText class="form-control"
+                <div class="password-field">
+
+                    <InputText class="input"
                                type="@(showConfirmPassword ? "text" : "password")"
                                @bind-Value="registerModel.ConfirmPassword"
-                               placeholder="Повторите пароль"/>
+                               placeholder="Повторите пароль" />
 
                     <button type="button"
                             class="password-toggle"
                             @onclick="ToggleConfirmPassword">
-                        @if (showConfirmPassword)
-                        {
-                            <i class="fas fa-eye-slash"></i>
-                        }
-                        else
-                        {
-                            <i class="fas fa-eye"></i>
-                        }
+                        @(showConfirmPassword ? "Скрыть" : "Показать")
                     </button>
+
                 </div>
 
                 <ValidationMessage For="@(() => registerModel.ConfirmPassword)" />
             </div>
 
-            <!-- SERVER ERROR -->
             @if (!string.IsNullOrWhiteSpace(errorMessage))
             {
-                <div class="validation-message" style="margin-bottom: 10px;">
+                <div class="validation-message auth-error">
                     @errorMessage
                 </div>
             }
 
-            <!-- SUBMIT -->
-            <button type="submit" class="btn btn-primary btn-login">
+            <button type="submit"
+                    class="btn primary btn-login"
+                    disabled="@isLoading">
+
                 @if (isLoading)
                 {
-                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                    <span>Регистрация...</span>
+                    <span class="spinner-border me-2"></span>
+                    <span>Создание аккаунта...</span>
                 }
                 else
                 {
                     <span>Создать аккаунт</span>
                 }
+
             </button>
 
         </EditForm>
@@ -122,6 +119,7 @@
         </div>
 
     </div>
+
 </div>
 
 @code {

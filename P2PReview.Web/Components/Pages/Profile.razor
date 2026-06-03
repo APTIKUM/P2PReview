@@ -26,83 +26,90 @@
                 <i class="fa-solid fa-right-from-bracket"></i>
             </a>
 
-
             <a href="/settings/profile" class="edit-icon">
                 <i class="fa-solid fa-pen"></i>
             </a>
         }
 
-     
+
         <img class="profile-avatar"
              src="@AvatarUrlProvider.GetAvatarUrl(profile?.AvatarId)" />
 
-        <h2 class="username">
+        <h1 class="username">
             @profile?.UserName
-        </h2>
+        </h1>
 
-        <div class="xp-block">
-            <i class="fa-solid fa-bolt"></i>
-            <span>@profile?.QualityScore</span>
+        <div class="profile-score">
+            <span class="score-title">Рейтинг </span>
+            <span class="score-value">@profile?.QualityScore</span>
         </div>
 
-        @if (!string.IsNullOrWhiteSpace(profile?.GitHubUrl))
-        {
-            <div class="profile-meta">
-                <i class="fa-brands fa-github" style="color:#24292e"></i>
-                <a href="@profile.GitHubUrl">@GetGitUsername(profile.GitHubUrl)</a>
-            </div>
-        }
+        <div class="profile-links">
 
-        
-        @if (!string.IsNullOrWhiteSpace(profile?.GitLabUrl))
-        {
-            <div class="profile-meta">
-                <i class="fa-brands fa-gitlab" style="color:darkorange"></i>
-                <a href="@profile.GitLabUrl">@GetGitUsername(profile.GitLabUrl)</a>
-            </div>
-        }
+            @if (!string.IsNullOrWhiteSpace(profile?.GitHubUrl))
+            {
+                <a href="@profile.GitHubUrl">
+                    GitHub
+                </a>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(profile?.GitLabUrl))
+            {
+                <a href="@profile.GitLabUrl">
+                    GitLab
+                </a>
+            }
+
+        </div>
 
         <div class="stats-box">
-            <div class="stats-title">Проведено ревью</div>
 
-            <div class="stats-content">
+            <div class="stats-title">
+                Активность ревьюера
+            </div>
 
-                <div class="circle" style="@CircleStyle">
-                    <div class="center">
-                        <span class="big">@(profile?.ReviewsGiven ?? 0)</span>
-                        <span class="small">Всего</span>
+            <div class="metrics-grid">
+
+                <div class="metric">
+                    <div class="metric-value">
+                        @(profile?.ReviewsGiven ?? 0)
+                    </div>
+                    <div class="metric-label">
+                        Всего ревью
                     </div>
                 </div>
 
-                <div class="legend">
-
-                    <div class="description-container difficulty-0">
-                        <div class="description">
-                            <span class="dot easy"></span>
-                            Простые
-                        </div>
-                        <div class="value">@(profile?.ReviewsEasy ?? 0)</div>
+                <div class="metric">
+                    <div class="metric-value">
+                        @(profile?.ReviewsEasy ?? 0)
                     </div>
-
-                    <div class="description-container difficulty-1">
-                        <div class="description">
-                            <span class="dot normal"></span>
-                            Средние
-                        </div>
-                        <div class="value">@(profile?.ReviewsNormal ?? 0)</div>
+                    <div class="metric-label">
+                        Простые
                     </div>
+                </div>
 
-                    <div class="description-container difficulty-2">
-                        <div class="description">
-                            Сложные
-                        </div>
-                        <div class="value">@(profile?.ReviewsHard ?? 0)</div>
+                <div class="metric">
+                    <div class="metric-value">
+                        @(profile?.ReviewsNormal ?? 0)
                     </div>
+                    <div class="metric-label">
+                        Средние
+                    </div>
+                </div>
 
+                <div class="metric">
+                    <div class="metric-value">
+                        @(profile?.ReviewsHard ?? 0)
+                    </div>
+                    <div class="metric-label">
+                        Сложные
+                    </div>
                 </div>
 
             </div>
+
         </div>
+
     </div>
 
 
@@ -245,7 +252,7 @@
                                 }
 
                             </div>
-                            
+
                             <div class="review-footer">
 
               
