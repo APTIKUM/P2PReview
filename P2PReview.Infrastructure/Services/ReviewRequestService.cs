@@ -37,8 +37,8 @@ namespace P2PReview.Infrastructure.Services
                 CreatedAt = DateTime.UtcNow,
                 Deadline = request.Deadline.HasValue ? request.Deadline.Value.Date.AddHours(23).AddMinutes(59) : null,
                 AllowEducationalUse = request.AllowEducationalUse,
-                TechStack = request.TechStack,
-                ReviewersCount = request.ReviewersCount
+                ReviewersCount = request.ReviewersCount,
+                Tags = request.Tags.ToArray()
             };
 
             await _context.ReviewRequests.AddAsync(reviewRequest);

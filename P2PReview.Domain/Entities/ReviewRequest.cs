@@ -11,8 +11,9 @@
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime? Deadline { get; set; }
         public bool AllowEducationalUse { get; set; } = false;
-        public string? TechStack { get; set; }
         public int ReviewersCount { get; set; }
+
+        public string[] Tags { get; set; } = Array.Empty<string>();
 
         // Files
         public ICollection<ReviewRequestFile> Files { get; set; } = new List<ReviewRequestFile>();

@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace P2PReview.Application.ReviewRequests
+﻿namespace P2PReview.Application.ReviewRequests
 {
     public class CreateReviewRequestDto
     {
@@ -11,5 +9,6 @@ namespace P2PReview.Application.ReviewRequests
         public bool AllowEducationalUse { get; set; } = false;
         public int ReviewersCount { get; set; } = 2;
         public string? TechStack { get; set; }
+        public List<string> Tags { get; set; } = new List<string>();
     }
 }

@@ -132,11 +132,15 @@ button,
 }
 
 .tag {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border: 1px solid #d8d2c4;
     padding: 4px 7px;
     font: 650 12px var(--mono);
     color: #514d45;
     background: #f8f4ea;
+    line-height: 1;
 }
 
 

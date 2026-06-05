@@ -97,24 +97,13 @@
 
             <div class="review-meta">
 
-                @if (reviewRequest.Tags != null)
+                @if (reviewRequest.Tags != null && reviewRequest.Tags.Length != 0)  
                 {
                     <div class="tags">
                         @foreach (var tag in reviewRequest.Tags)
                         {
                             <span class="tag">@tag</span>
                         }
-                    </div>
-                }
-
-                @if (!string.IsNullOrWhiteSpace(reviewRequest.TechStack))
-                {
-                    
-                    
-
-                    <div class="meta-chip">
-                        <span class="meta-label">Стек:</span>
-                        <span class="meta-value">@reviewRequest.TechStack</span>
                     </div>
                 }
 

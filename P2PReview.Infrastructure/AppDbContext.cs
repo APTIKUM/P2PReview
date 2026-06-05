@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using P2PReview.Domain.Entities;
+using System.Text.Json;
 
 namespace P2PReview.Infrastructure
 {
@@ -57,6 +58,30 @@ namespace P2PReview.Infrastructure
                 .HasForeignKey(n => n.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            builder.Entity<ReviewRequest>()
+                .Property(rr => rr.Tags)
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => DeserializeTags(v)
+                );
+
+
+        }
+
+        private static string[] DeserializeTags(string v)
+        {
+            if (string.IsNullOrWhiteSpace(v))
+                return Array.Empty<string>();
+
+            try
+            {
+                return JsonSerializer.Deserialize<string[]>(v)
+                       ?? Array.Empty<string>();
+            }
+            catch
+            {
+                return Array.Empty<string>();
+            }
         }
     }
 }

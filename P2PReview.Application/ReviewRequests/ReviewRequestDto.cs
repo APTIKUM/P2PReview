@@ -12,7 +12,6 @@ namespace P2PReview.Application.ReviewRequests
         public int Difficulty { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime? Deadline { get; set; }
-        public string? TechStack { get; set; }
         public int ReviewersCount { get; set; }
         public bool IsOwn { get; set; } = false;
 
@@ -72,8 +71,9 @@ namespace P2PReview.Application.ReviewRequests
             Difficulty = request.Difficulty;
             CreatedAt = request.CreatedAt;
             Deadline = request.Deadline;
-            TechStack = request.TechStack;
             ReviewersCount = request.ReviewersCount;
+
+            Tags = request.Tags;
         }
 
         public ReviewRequestDto() 

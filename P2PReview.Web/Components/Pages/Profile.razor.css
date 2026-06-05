@@ -350,8 +350,8 @@
 }
 
     .new-review-request-btn:hover {
-        transform: translate(-4px,-4px);
-        box-shadow: 8px 8px 0 #d8d2c4;
+        transform: translate(-2px,-2px);
+        box-shadow: 4px 4px 0 #d8d2c4;
     }
 
 /* LIST */

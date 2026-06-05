@@ -162,15 +162,20 @@
                         @if (!string.IsNullOrWhiteSpace(review.Description))
                         {
                             <div class="review-description">
-                                @(review.Description.Length <= 100 ? review.Description : review.Description.Substring(0, 100))
+                                @review.Description
                             </div>
                         }
 
                         <div class="review-footer">
 
-              
-                            <div class="@(string.IsNullOrWhiteSpace(review.TechStack) ? "" : "review-tech")">
-                                @review.TechStack
+                            <div class="tags">
+                                @if (review.Tags != null && review.Tags.Length != 0)
+                                {
+                                    @foreach (var tag in review.Tags)
+                                    {
+                                        <span class="tag">@tag</span>
+                                    }
+                                }
                             </div>
 
                             <div class="review-deadline-label">
@@ -252,11 +257,15 @@
 
                             </div>
 
-                            <div class="review-footer">
-
-              
-                                <div class="@(string.IsNullOrWhiteSpace(request.TechStack) ? "" : "review-tech")">
-                                    @request.TechStack
+                            <div class="review-footer">                 
+                                <div class="tags">
+                                    @if (request.Tags != null && request.Tags.Length != 0)
+                                    {
+                                        @foreach (var tag in request.Tags)
+                                        {
+                                            <span class="tag">@tag</span>
+                                        }
+                                    }
                                 </div>
 
                                 @if (response.Status == ReviewResponseStatus.InProgress)

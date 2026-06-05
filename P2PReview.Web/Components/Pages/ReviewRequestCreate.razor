@@ -6,6 +6,7 @@
 @using P2PReview.Application.Interfaces
 @using P2PReview.Application.ReviewRequests
 @using P2PReview.Domain.Enums
+@using P2PReview.Domain.ConstantsImLazy
 @using P2PReview.Web.Components.Shared
 
 @rendermode InteractiveServer
@@ -57,9 +58,55 @@
                       @bind="model.Description"></textarea>
         </div>
 
-        @* <div class="form-group">
-            <label class="not-implemented">Стек технологий</label>
-        </div> *@
+        <div class="form-group">
+
+            <label>
+                Стек технологий
+            </label>
+
+            <div class="tags-picker">
+
+                @foreach (var tag in model.Tags)
+                {
+                    <div class="selected-tag">
+
+                        <span>@tag</span>
+
+                        <button type="button"
+                                @onclick="() => RemoveTag(tag)">
+                            ✕
+                        </button>
+
+                    </div>
+                }
+
+                @if (model.Tags.Count < 5)
+                {
+                    <input class="tag-input"
+                           placeholder="Начните вводить..."
+                           @bind="tagInput"
+                           @bind:event="oninput" />
+                }
+
+            </div>
+
+            @if (!string.IsNullOrWhiteSpace(tagInput))
+            {
+                <div class="tags-suggestions">
+
+                    @foreach (var tag in Suggestions)
+                    {
+                        <button type="button"
+                                class="suggestion-item"
+                                @onclick="() => AddTag(tag)">
+                            @tag
+                        </button>
+                    }
+
+                </div>
+            }
+
+        </div>
     </div>
 
     <!-- UPLOAD -->
@@ -142,16 +189,14 @@
                             @CodeLanguageExtensions.ToDisplayName(language)
                         </option>
                     }
-
                 </select>
 
             </div>
 
-            <MonacoEditor @bind-Value="pasteCodeContent"
-                          CodeLanguage="@pasteCodeLanguage"
-                          MinHeight="240px"
-                          MaxHeight="700px"
-                          BorderRadius="10px" />
+            <div class="editor-panel" style="height : 600px;">
+                <MonacoEditor @bind-Value="pasteCodeContent"
+                              CodeLanguage="@pasteCodeLanguage"/>
+            </div>
         }
 
         @if (CurUploadMode == UploadMode.Git)
@@ -182,24 +227,24 @@
         <div class="form-group">
             <label>Количество ревьюеров</label>
 
-            <div class="select-tabs">
+            <div class="select-tabs ">
 
-                <button class="tab @(model.ReviewersCount == 1 ? "active" : "")"
+                <button class="tab digit @(model.ReviewersCount == 1 ? "active" : "")"
                         @onclick="() => model.ReviewersCount = 1">
                     1
                 </button>
 
-                <button class="tab @(model.ReviewersCount == 2 ? "active" : "")"
+                <button class="tab digit @(model.ReviewersCount == 2 ? "active" : "")"
                         @onclick="() => model.ReviewersCount = 2">
                     2
                 </button>
-            
-                <button class="tab @(model.ReviewersCount == 3 ? "active" : "")"
+
+                <button class="tab digit @(model.ReviewersCount == 3 ? "active" : "")"
                         @onclick="() => model.ReviewersCount = 3">
                     3
                 </button>
 
-                <button class="tab @(model.ReviewersCount == 4 ? "active" : "")"
+                <button class="tab digit @(model.ReviewersCount == 4 ? "active" : "")"
                         @onclick="() => model.ReviewersCount = 4">
                     4
                 </button>
@@ -221,7 +266,7 @@
                         @onclick="() => model.Difficulty = 1">
                     нормально
                 </button>
-            
+
                 <button class="tab hard @(model.Difficulty == 2 ? "active" : "")"
                         @onclick="() => model.Difficulty = 2">
                     сложно
@@ -460,5 +505,33 @@
         var id = await ReviewRequestService.CreateReviewRequestAsync(model, uploadedFiles);
 
         Nav.NavigateTo($"/review/request/{id}", true);
+    }
+
+
+    private string tagInput = "";
+
+    private IEnumerable<string> Suggestions =>
+        ReviewTags.All
+            .Where(x =>
+                !model.Tags.Contains(x) &&
+                x.Contains(tagInput, StringComparison.OrdinalIgnoreCase))
+            .Take(8);
+
+    private void AddTag(string tag)
+    {
+        if (model.Tags.Count >= 5)
+            return;
+
+        if (model.Tags.Contains(tag))
+            return;
+
+        model.Tags.Add(tag);
+
+        tagInput = "";
+    }
+
+    private void RemoveTag(string tag)
+    {
+        model.Tags.Remove(tag);
     }
 }

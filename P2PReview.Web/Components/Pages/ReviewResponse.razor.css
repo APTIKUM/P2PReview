@@ -73,7 +73,6 @@
 .delete-btn {
     background: #f7e9ea;
     color: var(--red);
-    border-color: var(--line);
 }
 
 .save-btn {
@@ -82,9 +81,35 @@
 }
 
 .submit-btn {
-    background: #f1f3ff;
-    color: #6c63ff;
+    background: #f6f2e9;
+    color: #8a6a1f;
 }
+
+.status-banner {
+    padding: 8px 12px;
+    border: 1px solid var(--line);
+    font-size: 14px;
+    font-weight: 800;
+    text-transform: uppercase;
+    font-family: var(--mono);
+    background: #fffdf8;
+    color: #5f5b53;
+}
+
+    .status-banner.submitted {
+        background: #f6f2e9;
+        color: #8a6a1f;
+    }
+
+    .status-banner.accepted {
+        background: #e8f3ec;
+        color: var(--accent);
+    }
+
+    .status-banner.rejected {
+        background: #f7e9ea;
+        color: var(--red);
+    }
 
 .review-meta {
     display: flex;
