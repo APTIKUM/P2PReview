@@ -1,23 +1,17 @@
 ﻿@page "/profile"
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.AspNetCore.Components.Authorization
-@using System.Security.Claims
-@using P2PReview.Application.Interfaces
-
-@attribute [Authorize]
+@using P2PReview.Web.State
 
 @inject NavigationManager Nav
-@inject AuthenticationStateProvider AuthProvider
-@inject IUserService UserService
+@inject UserContext UserContext
 
 @code {
     protected override async Task OnInitializedAsync()
     {
-        var authUserId = await UserService.GetAuthUserId();
+        await UserContext.InitializeAsync();
 
-        if (authUserId != null)
+        if (UserContext.Profile != null)
         {
-            Nav.NavigateTo($"/profile/{authUserId}", true);
+            Nav.NavigateTo($"/profile/{UserContext.Profile.Id}", true);
         }
         else
         {

@@ -1,4 +1,4 @@
-﻿@page "/reviewset"
+﻿@page "/reviewpool"
 
 @using P2PReview.Application.ReviewRequests
 @using P2PReview.Application.Interfaces
@@ -22,14 +22,14 @@
                 Открытые
             </button>
 
-            @if(UserContext.Profile != null)
+            @if (UserContext.Profile != null)
             {
                 <button class="tab @(activeTab == Tabs.My ? "active" : "")"
                         @onclick="() => SetTabOpen(Tabs.My)">
                     Мои запросы
                 </button>
             }
-            
+
             <button class="tab @(activeTab == Tabs.Archive ? "active" : "")"
                     @onclick="() => SetTabOpen(Tabs.Archive)">
                 База ревью
@@ -59,13 +59,22 @@
                         @if (!string.IsNullOrWhiteSpace(review.Description))
                         {
                             <div class="review-description">
-                                @(review.Description.Length <= 100 ? review.Description : review.Description.Substring(0, 100))
+                                @review.Description
                             </div>
                         }
 
                         <div class="review-footer">
 
-                          
+                            @if (review.Tags != null)
+                            {
+                                <div class="tags">
+                                    @foreach (var tag in review.Tags)
+                                    {
+                                        <span class="tag">@tag</span>
+                                    }
+                                </div>
+                            }
+
                             <div class="@(string.IsNullOrWhiteSpace(review.TechStack) ? "" : "review-tech")">
                                 @review.TechStack
                             </div>

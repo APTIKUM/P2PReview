@@ -1,6 +1,5 @@
 ﻿@page "/profile/{UserId:guid}"
 
-@using Microsoft.AspNetCore.Authorization
 @using P2PReview.Application.Interfaces
 @using P2PReview.Application.Users
 @using P2PReview.Web.Services
@@ -26,7 +25,7 @@
                 <i class="fa-solid fa-right-from-bracket"></i>
             </a>
 
-            <a href="/settings/profile" class="edit-icon">
+            <a href="/profile/settings" class="edit-icon">
                 <i class="fa-solid fa-pen"></i>
             </a>
         }
@@ -225,28 +224,28 @@
                                 @if (response.Status == ReviewResponseStatus.InProgress)
                                 {
                                     <div class="status-banner inprogress">
-                                        <i class="fa-solid fa-pen"></i>
+                                        @* <i class="fa-solid fa-pen"></i> *@
                                         <span>В работе</span>
                                     </div>
                                 }
                                 else if (response.Status == ReviewResponseStatus.Submitted)
                                 {
                                     <div class="status-banner submitted">
-                                        <i class="fa-regular fa-clock"></i>
+                                        @* <i class="fa-regular fa-clock"></i> *@
                                         <span>Ждет оценки</span>
                                     </div>
                                 }
                                 else if (response.Status == ReviewResponseStatus.Accepted)
                                 {
                                     <div class="status-banner accepted">
-                                        <i class="fa-solid fa-check"></i>
+                                        @* <i class="fa-solid fa-check"></i> *@
                                         <span>Принято</span>
                                     </div>
                                 }
                                 else if (response.Status == ReviewResponseStatus.Rejected)
                                 {
                                     <div class="status-banner rejected">
-                                        <i class="fa-solid fa-xmark"></i>
+                                        @* <i class="fa-solid fa-xmark"></i> *@
                                         <span>Отклонено</span>
                                     </div>
                                 }

@@ -125,6 +125,21 @@ button,
     margin-right: 0.5rem;
 }
 
+.tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.tag {
+    border: 1px solid #d8d2c4;
+    padding: 4px 7px;
+    font: 650 12px var(--mono);
+    color: #514d45;
+    background: #f8f4ea;
+}
+
+
 
 /* monaco */
 .comment-line {
@@ -134,4 +149,18 @@ button,
 .active-line {
     background: #2f5d5047 !important;
     background: #d4a43a55 !important;
+}
+
+
+.empty-state {
+    padding: 80px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: 1px dashed var(--line);
+    background: #fffdf8;
+    text-align: center;
+    color: #5f5b53;
+    gap: 10px;
 }

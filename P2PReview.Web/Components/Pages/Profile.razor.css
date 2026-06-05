@@ -1,6 +1,6 @@
 ﻿.profile-page {
     display: grid;
-    grid-template-columns: 360px 1fr;
+    grid-template-columns: 360px minmax(0, 1fr);
     gap: 24px;
     padding: 24px;
     align-items: start;
@@ -33,6 +33,10 @@
     font-weight: 700;
     letter-spacing: -.04em;
     text-align: center;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .xp-block {
@@ -299,6 +303,7 @@
     background: #fffdf8;
     border: 1px solid var(--line);
     padding: 28px;
+    min-width: 0;
 }
 
 /* TABS */
@@ -334,10 +339,11 @@
 
 .new-review-request-btn {
     width: fit-content;
-    padding: 12px 18px;
+    padding: 10px 16px;
     border: 1px solid var(--black);
     background: var(--black);
     color: white;
+    font-size: 14px;
     font-weight: 700;
     margin-bottom: 20px;
     transition: all .2s;
@@ -382,15 +388,25 @@
     gap: 16px;
 }
 
+
+
 .review-title {
-    font-size: 22px;
+    font-size: 21px;
     font-weight: 800;
     letter-spacing: -.03em;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .review-description {
     color: #5f5b53;
     line-height: 1.45;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .review-footer {
@@ -423,11 +439,12 @@
 .difficulty {
     padding: 6px 10px;
     border: 1px solid var(--line);
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 800;
     text-transform: uppercase;
     font-family: var(--mono);
 }
+
 
 .difficulty-0 {
     background: #e8f3ec;
@@ -452,7 +469,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 800;
     text-transform: uppercase;
     font-family: var(--mono);

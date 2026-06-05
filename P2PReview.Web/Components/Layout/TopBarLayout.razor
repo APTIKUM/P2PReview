@@ -1,6 +1,5 @@
 ﻿@using P2PReview.Application.Interfaces
 @using P2PReview.Application.Notifications
-@using P2PReview.Web.Components.Icons
 @using P2PReview.Web.Services
 @using P2PReview.Web.State
 
@@ -19,11 +18,12 @@
 
     <header class="topbar">
 
-        <a class="logo" href="/">
+        <a class="logo" href="/reviewpool">
             P2P Review
         </a>
 
-        <nav></nav>
+        <nav>
+        </nav>
 
         @if (UserContext.Profile != null)
         {

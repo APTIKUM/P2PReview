@@ -43,35 +43,40 @@
                             @reviewRequest.Name
                         </h1>
 
-                        <div class="difficulty difficulty-@reviewRequest.Difficulty">
+                        @* <div class="difficulty difficulty-@reviewRequest.Difficulty">
                             @reviewRequest.DifficultyLabel
-                        </div>
+                        </div> *@
 
                     </div>
                     <div class="buttons">
                         @if (reviewRequest.IsOwn)
                         {
-                            
+
                             int index = 1;
                             foreach (var response in responses.Where(r => r.Status == ReviewResponseStatus.Submitted))
                             {
                                 var id = response.Id;
 
-                                <button class="@($"review-btn-{index}")" @onclick="() => OpenResponsePage(id)">
+                                <button @onclick="() => OpenResponsePage(id)">
                                     Ревью @index
                                 </button>
                                 index++;
+
+                                if (index == 5)
+                                {
+                                    break;
+                                }
                             }
 
                             <button class="delete-btn" @onclick="DeleteReviewRequest">
-                                <i class="fa-solid fa-trash"></i>
+                                @* <i class="fa-solid fa-trash"></i> *@
                                 Удалить
                             </button>
                         }
                         else if (UserContext.Profile != null)
                         {
                             <button class="review-btn" @onclick="CreateReviewResponse">
-                                <i class="fa-solid fa-pen"></i>
+                                @* <i class="fa-solid fa-pen"></i> *@
                                 Начать ревью
                             </button>
                         }
@@ -92,8 +97,21 @@
 
             <div class="review-meta">
 
+                @if (reviewRequest.Tags != null)
+                {
+                    <div class="tags">
+                        @foreach (var tag in reviewRequest.Tags)
+                        {
+                            <span class="tag">@tag</span>
+                        }
+                    </div>
+                }
+
                 @if (!string.IsNullOrWhiteSpace(reviewRequest.TechStack))
                 {
+                    
+                    
+
                     <div class="meta-chip">
                         <span class="meta-label">Стек:</span>
                         <span class="meta-value">@reviewRequest.TechStack</span>
@@ -187,9 +205,11 @@
 
                             </div>
 
-                            <MonacoEditor @bind-Value="selectedFile?.Content"
-                                          CodeLanguage="@selectedLanguage"
-                                          ReadOnly="true"/>
+                            <div class="editor-panel" style="height : 600px;">
+                                <MonacoEditor @bind-Value="selectedFile?.Content"
+                                              CodeLanguage="@selectedLanguage"
+                                              ReadOnly="true" />
+                            </div>
 
                         </div>
 
@@ -234,7 +254,7 @@
 
         if (success)
         {
-            Nav.NavigateTo("/", true);
+            Nav.NavigateTo("/reviewpool", true);
         }
     }
 
