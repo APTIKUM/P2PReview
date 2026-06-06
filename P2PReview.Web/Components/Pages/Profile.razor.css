@@ -473,6 +473,7 @@
     font-weight: 800;
     text-transform: uppercase;
     font-family: var(--mono);
+    white-space: nowrap;
 }
 
     .status-banner.inprogress {

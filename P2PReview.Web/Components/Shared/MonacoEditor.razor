@@ -14,9 +14,13 @@
 
     [Parameter] public bool ReadOnly { get; set; } = false;
 
+    [Parameter] public bool IsHighlightLineByClick { get; set; } = false;
+
     [Parameter] public string Value { get; set; } = "";
 
     [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter] public EventCallback<int> LineClicked { get; set; }
 
     [Parameter] public CodeLanguage CodeLanguage { get; set; } = CodeLanguage.JavaScript;
 
@@ -194,9 +198,13 @@
     [JSInvokable]
     public async Task OnLineClicked(int line)
     {
-        if (!ReadOnly)
+
+        
+        if (IsHighlightLineByClick)
         {
             await HighlightLine(line);
         }
+
+        await LineClicked.InvokeAsync(line);
     }
 }

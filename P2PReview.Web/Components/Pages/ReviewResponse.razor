@@ -41,7 +41,7 @@
                             @reviewRequest.Name
                         </h1>
 
-                      @*   <div class="difficulty difficulty-@reviewRequest.Difficulty">
+                        @*   <div class="difficulty difficulty-@reviewRequest.Difficulty">
                             @reviewRequest.DifficultyLabel
                         </div> *@
 
@@ -215,13 +215,115 @@
                             </div>
 
 
-                            <div class="editor-panel" style="height : 600px;">
-                                <MonacoEditor @bind-Value="selectedFile?.Content"
-                                              CodeLanguage="@selectedLanguage"
-                                              ReadOnly="true"
-                                              Comments="@selectedFileComments" />
+                            <div class="review-body" style="@(!IsCanEditComments && _selectedFileComments.Count == 0 ? "grid-template-columns: 1fr;" : "")">
+
+                                <div class="editor-panel">
+                                    <MonacoEditor @ref="_monacoEditor"
+                                                  @bind-Value="selectedFile?.Content"
+                                                  CodeLanguage="@selectedLanguage"
+                                                  ReadOnly="true"
+                                                  IsHighlightLineByClick="@IsCanEditComments"
+                                                  Comments="@_selectedFileComments"
+                                                  LineClicked="@LineClikedHandle" />
+                                </div>
+
+
+                                @if (IsCanEditComments || _selectedFileComments.Count != 0)
+                                {
+
+
+                                    <aside class="comments-panel">
+
+                                        @if (IsCanEditComments)
+                                        {
+                                            <div class="comment-create">
+
+                                                <div class="comment-types">
+
+                                                    <button @onclick="() => newComment.Type = ReviewResponseCommentType.Issue"
+                                                            class="comment-badge Issue add-comment-btn
+                                                        @(newComment.Type != ReviewResponseCommentType.Issue ? "not-active" : "")">
+                                                        БАГ
+
+                                                    </button>
+
+                                                    <button @onclick="() => newComment.Type = ReviewResponseCommentType.Suggestion"
+                                                            class="comment-badge Suggestion add-comment-btn
+                                                        @(newComment.Type != ReviewResponseCommentType.Suggestion ? "not-active" : "")">
+                                                        ПРЕДЛОЖЕНИЕ
+                                                    </button>
+
+                                                    <button @onclick="() => newComment.Type = ReviewResponseCommentType.Praise"
+                                                            class="comment-badge Praise add-comment-btn
+                                                        @(newComment.Type != ReviewResponseCommentType.Praise ? "not-active" : "")">
+                                                        ПОХВАЛА
+                                                    </button>
+
+                                                </div>
+
+                                                <textarea maxlength="1000"
+                                                          @bind="newComment.Content"
+                                                          placeholder="Комментарий...">
+                                                </textarea>
+
+                                                <div class="footer">
+
+                                                    <button class="add-comment-btn"
+                                                            @onclick="async () => await AddComment(newComment)">
+                                                        Добавить
+                                                    </button>
+
+                                                    <span class="line-info">
+                                                        @(
+                                                                                                newComment.Line == 0
+                                                                                                                                            ? "Строка не выбрана"
+                                                                                                                                            : $"Строка {newComment.Line}"
+                                                                    )
+                                                    </span>
+
+                                                </div>
+
+
+
+                                            </div>
+                                        }
+
+                                        @foreach (var comment in _selectedFileComments)
+                                        {
+                                            var line = comment.Line;
+
+                                            <div class="comment"
+                                                 @onmouseenter="async () => await _monacoEditor!.HighlightLine(line)">
+
+                                                <div class="comment-header">
+
+                                                    <div class="comment-badge @comment.Type">
+                                                        @comment.TypeText
+                                                    </div>
+
+                                                    @if (IsCanEditComments)
+                                                    {
+                                                        <button class="comment-delete-btn"
+                                                                @onclick="() => DeleteComment(comment)">
+                                                            ✕
+                                                        </button>
+                                                    }
+
+
+
+                                                </div>
+
+                                                <div class="comment-text">
+                                                    @comment.Content
+                                                </div>
+
+                                            </div>
+                                        }
+                                    </aside>
+                                }
+
                             </div>
-                            
+
                         </div>
 
                     </div>
@@ -324,7 +426,9 @@
     [Parameter]
     public Guid Id { get; set; }
 
-    private List<ReviewResponseCommentDto> selectedFileComments = new();
+    private MonacoEditor? _monacoEditor;
+
+    private List<ReviewResponseCommentDto> _selectedFileComments = new();
 
     private ReviewResponseDto? reviewResponse;
     private ReviewRequestDto? reviewRequest;
@@ -332,35 +436,40 @@
     private ReadedCodeFileDto? selectedFile;
     private CodeLanguage selectedLanguage = CodeLanguage.PlainText;
 
-    private async Task OnCommentSaved(ReviewResponseCommentDto comment)
+    private bool IsCanEditComments => reviewResponse != null
+        && reviewResponse.IsOwn
+        && reviewResponse.Status == ReviewResponseStatus.InProgress;
+
+    private ReviewResponseCommentDto newComment = new();
+
+    private async Task AddComment(ReviewResponseCommentDto comment)
     {
-        var existing = reviewResponse.Comments.FirstOrDefault(x => x.Line == comment.Line
-            && x.FileId == selectedFile.Id);
-
-        if (existing != null)
+        if (comment.Line == 0 || string.IsNullOrWhiteSpace(comment.Content))
         {
-            existing.Content = comment.Content;
-            existing.Type = comment.Type;
+            return;
         }
-        else
-        {
-            comment.FileId = selectedFile.Id;
 
-            reviewResponse.Comments.Add(comment);
+        comment.Id = Guid.NewGuid().ToString();
+        comment.CreatedAt = DateTime.UtcNow;
+        comment.FileId = selectedFile.Id;
 
-            selectedFileComments.Add(comment);
-        }
+
+
+        reviewResponse.Comments.Add(comment);
+        _selectedFileComments.Add(comment);
+
+        newComment = new();
+
     }
 
-    private async Task OnCommentDeleted(ReviewResponseCommentDto comment)
+    private async Task DeleteComment(ReviewResponseCommentDto comment)
     {
-        var existing = reviewResponse.Comments.FirstOrDefault(x => x.Line == comment.Line
-            && x.FileId == selectedFile.Id);
+        var existing = reviewResponse.Comments.FirstOrDefault(x => x.Id == comment.Id);
 
         if (existing != null)
         {
             reviewResponse.Comments.Remove(existing);
-            selectedFileComments.Remove(existing);
+            _selectedFileComments.Remove(existing);
         }
     }
 
@@ -391,10 +500,16 @@
 
         selectedLanguage = CodeLanguageExtensions.FromFileName(file.Name);
 
-        selectedFileComments = reviewResponse.Comments.Where(x => x.FileId == selectedFile.Id).ToList();
+        _selectedFileComments = reviewResponse.Comments
+            .Where(x => x.FileId == selectedFile.Id)
+            .OrderBy(x => x.Line)
+            .ToList();
     }
 
-
+    private async Task LineClikedHandle(int line)
+    {
+        newComment.Line = line;
+    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -448,7 +563,7 @@
 
         if (success)
         {
-            Nav.NavigateTo("/", true);
+            Nav.NavigateTo("/reviewpool", true);
         }
     }
 }

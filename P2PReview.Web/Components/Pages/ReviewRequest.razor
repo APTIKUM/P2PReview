@@ -43,17 +43,13 @@
                             @reviewRequest.Name
                         </h1>
 
-                        @* <div class="difficulty difficulty-@reviewRequest.Difficulty">
-                            @reviewRequest.DifficultyLabel
-                        </div> *@
-
                     </div>
                     <div class="buttons">
                         @if (reviewRequest.IsOwn)
                         {
 
                             int index = 1;
-                            foreach (var response in responses.Where(r => r.Status == ReviewResponseStatus.Submitted))
+                            foreach (var response in responses.Where(r => r.Status != ReviewResponseStatus.InProgress))
                             {
                                 var id = response.Id;
 

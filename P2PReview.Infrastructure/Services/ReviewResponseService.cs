@@ -220,7 +220,7 @@ namespace P2PReview.Infrastructure.Services
 
                 if (newStatus == ReviewResponseStatus.Submitted)
                 {
-                    notification.Title = $"Новое ревью {reviewRequest.Name}";
+                    notification.Title = $"Новое ревью \"{reviewRequest.Name}\"";
                     notification.Url = $"review/response/{reviewResponse.Id}";
                     notification.UserId = $"{reviewRequest.UserId}";
                 }
@@ -231,11 +231,11 @@ namespace P2PReview.Infrastructure.Services
 
                     if (newStatus == ReviewResponseStatus.Accepted)
                     {
-                        notification.Title = $"Принято ревью {reviewRequest.Name}";   
+                        notification.Title = $"Принято ревью \"{reviewRequest.Name}\"";   
                     }
                     else if (newStatus == ReviewResponseStatus.Rejected)
                     {
-                        notification.Title = $"Отклонено ревью {reviewRequest.Name}";
+                        notification.Title = $"Отклонено ревью \"{reviewRequest.Name}\"";
                     }
                 }
 

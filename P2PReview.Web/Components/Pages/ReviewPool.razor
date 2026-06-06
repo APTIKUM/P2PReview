@@ -40,58 +40,69 @@
 
         @if (activeTab != Tabs.Archive)
         {
-            <div class="reviews-list">
+            @if (reviewRequests.Count != 0)
+            {
+                <div class="reviews-list">
 
-                @foreach (var review in reviewRequests)
-                {
-                    <a class="review-card" href="@($"/review/request/{review.Id}")" data-enhance-nav="false">
 
-                        <div class="review-header">
-                            <div class="review-title">
-                                @review.Name
+
+                    @foreach (var review in reviewRequests)
+                    {
+                        <a class="review-card" href="@($"/review/request/{review.Id}")" data-enhance-nav="false">
+
+                            <div class="review-header">
+                                <div class="review-title">
+                                    @review.Name
+                                </div>
+
+                                <div class="difficulty difficulty-@review.Difficulty">
+                                    @GetDifficulty(review.Difficulty)
+                                </div>
                             </div>
 
-                            <div class="difficulty difficulty-@review.Difficulty">
-                                @GetDifficulty(review.Difficulty)
-                            </div>
-                        </div>
+                            @if (!string.IsNullOrWhiteSpace(review.Description))
+                            {
+                                <div class="review-description">
+                                    @review.Description
+                                </div>
+                            }
 
-                        @if (!string.IsNullOrWhiteSpace(review.Description))
-                        {
-                            <div class="review-description">
-                                @review.Description
-                            </div>
-                        }
+                            <div class="review-footer">
 
-                        <div class="review-footer">
-
-                            <div class="tags">
-                                @if (review.Tags != null && review.Tags.Length != 0)
-                                {
-                                    @foreach (var tag in review.Tags)
+                                <div class="tags">
+                                    @if (review.Tags != null && review.Tags.Length != 0)
                                     {
-                                        <span class="tag">@tag</span>
+                                        @foreach (var tag in review.Tags)
+                                        {
+                                            <span class="tag">@tag</span>
+                                        }
                                     }
-                                }
 
+                                </div>
+
+
+                                <div class="review-deadline-label">
+                                    @review.DeadlineLabel
+                                </div>
                             </div>
 
-                            
-                            <div class="review-deadline-label">
-                                @review.DeadlineLabel
-                            </div>
-                        </div>
+                        </a>
+                    }
+                </div>
 
-                    </a>
-                }
-
-            </div>
+            }
+            else
+            {
+                <div class="empty-state">
+                    Пусто :(
+                </div>
+            }
         }
         else
         {
-            <div class="empty-state">
-                Пусто :(
-            </div>
+        <div class="empty-state">
+            Пусто :(
+        </div>
         }
 
         
