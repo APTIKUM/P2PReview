@@ -61,10 +61,17 @@ namespace P2PReview.Infrastructure
             builder.Entity<ReviewRequest>()
                 .Property(rr => rr.Tags)
                 .HasConversion(
-                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
-                    v => DeserializeTags(v)
+                    tags => JsonSerializer.Serialize(tags, (JsonSerializerOptions?)null),
+                    tags => DeserializeTags(tags)
                 );
 
+
+            builder.Entity<User>()
+                .Property(u => u.Tags)
+                .HasConversion(
+                    tags => JsonSerializer.Serialize(tags, (JsonSerializerOptions?)null),
+                    tags => DeserializeTags(tags)
+                );
 
         }
 

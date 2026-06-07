@@ -38,6 +38,11 @@
             @profile?.UserName
         </h1>
 
+
+       
+
+
+
         <div class="profile-score">
             <span class="score-title">Рейтинг </span>
             <span class="score-value">@profile?.QualityScore</span>
@@ -60,6 +65,18 @@
             }
 
         </div>
+
+       
+
+        @if (profile.Tags.Length != 0)
+        {
+            <div class="profile-tags">
+                @foreach (var tag in profile.Tags)
+                {
+                    <span class="tag">@tag</span>
+                }
+            </div>
+        }
 
         <div class="stats-box">
 
@@ -257,7 +274,7 @@
 
                             </div>
 
-                            <div class="review-footer">                 
+                            <div class="review-footer">
                                 <div class="tags">
                                     @if (request.Tags != null && request.Tags.Length != 0)
                                     {

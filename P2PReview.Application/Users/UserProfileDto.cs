@@ -16,6 +16,7 @@ namespace P2PReview.Application.Users
         public int ReviewsEasy { get; set; }
         public int ReviewsNormal { get; set; }
         public int ReviewsHard { get; set; }
+        public string[] Tags { get; set; }
 
         public string? GitHubUrl { get; set; } = null;
         public string? GitLabUrl { get; set; } = null;
@@ -34,6 +35,7 @@ namespace P2PReview.Application.Users
             GitHubUrl = user.GitHubUrl;
             GitLabUrl = user.GitLabUrl;
             Email = user.Email;
+            Tags = user.Tags;
         }
 
         public UserProfileDto()

@@ -7,6 +7,8 @@
 @using P2PReview.Application.Users
 @using P2PReview.Web.Services
 @using P2PReview.Web.State
+@using P2PReview.Domain.ConstantsImLazy
+
 
 @rendermode InteractiveServer
 @attribute [Authorize]
@@ -84,6 +86,56 @@ else
                         <ValidationMessage For="@(() => model.GitLabUrl)" />
                     </div>
 
+                    <div class="group">
+
+                        <label>
+                            Стек технологий
+                        </label>
+
+                        <div class="tags-picker">
+
+                            @foreach (var tag in _tags)
+                            {
+                                <div class="selected-tag">
+
+                                    <span>@tag</span>
+
+                                    <button type="button"
+                                            @onclick="() => RemoveTag(tag)">
+                                        ✕
+                                    </button>
+
+                                </div>
+                            }
+
+                            @if (_tags.Count < 5)
+                            {
+                                <input class="tag-input"
+                                       placeholder="Начните вводить..."
+                                       @bind="tagInput"
+                                       @bind:event="oninput" />
+                            }
+
+                        </div>
+
+                        @if (!string.IsNullOrWhiteSpace(tagInput))
+                        {
+                            <div class="tags-suggestions">
+
+                                @foreach (var tag in Suggestions)
+                                {
+                                    <button type="button"
+                                            class="suggestion-item"
+                                            @onclick="() => AddTag(tag)">
+                                        @tag
+                                    </button>
+                                }
+
+                            </div>
+                        }
+
+                    </div>
+
                     <div class="actions">
                         <button type="submit" class="btn-save">
                             Сохранить
@@ -115,6 +167,7 @@ else
         model.UserName = UserContext.Profile?.UserName ?? "";
         model.GitHubUrl = UserContext.Profile?.GitHubUrl ?? "";
         model.GitLabUrl = UserContext.Profile?.GitLabUrl ?? "";
+        _tags = UserContext.Profile?.Tags.ToList() ?? new ();
 
         previewAvatarUrl = AvatarUrlProvider.GetAvatarUrl(UserContext.Profile?.AvatarId);
     }
@@ -151,7 +204,8 @@ else
             UserName = model.UserName,
             AvatarId = newAvatarId,
             GitHubUrl = model.GitHubUrl,
-            GitLabUrl = model.GitLabUrl
+            GitLabUrl = model.GitLabUrl,
+            Tags = _tags.ToArray(),
         });
 
         await UserContext.RefreshAsync();
@@ -164,6 +218,7 @@ else
         Nav.NavigateTo("/profile");
     }
 
+    private List<string> _tags = new();
     public class EditUserProfileModel
     {
         [Required(ErrorMessage = "Обязательно для заполнения")]
@@ -172,9 +227,36 @@ else
         [RegularExpression(@"^https://github\.com/.*",
         ErrorMessage = "Невалидный url")]
         public string? GitHubUrl { get; set; }
-        
+
         [RegularExpression(@"^https://gitlab\.com/.*",
         ErrorMessage = "Невалидный url")]
         public string? GitLabUrl { get; set; }
+    }
+
+    private string tagInput = "";
+
+    private IEnumerable<string> Suggestions =>
+        ReviewTags.All
+            .Where(x =>
+                !_tags.Contains(x) &&
+                x.Contains(tagInput, StringComparison.OrdinalIgnoreCase))
+            .Take(8);
+
+    private void AddTag(string tag)
+    {
+        if (_tags.Count >= 5)
+            return;
+
+        if (_tags.Contains(tag))
+            return;
+
+        _tags.Add(tag);
+
+        tagInput = "";
+    }
+
+    private void RemoveTag(string tag)
+    {
+        _tags.Remove(tag);
     }
 }

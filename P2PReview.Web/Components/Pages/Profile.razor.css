@@ -123,6 +123,15 @@
             box-shadow: 4px 4px 0 #d8d2c4;
         }
 
+.profile-tags {
+    margin-top: 12px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+}
+
+
 .stats-box {
     width: 100%;
     margin-top: 24px;
