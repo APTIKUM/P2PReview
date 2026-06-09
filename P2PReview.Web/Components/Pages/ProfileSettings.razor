@@ -86,6 +86,9 @@ else
                         <ValidationMessage For="@(() => model.GitLabUrl)" />
                     </div>
 
+                    
+
+
                     <div class="group">
 
                         <label>
@@ -136,6 +139,26 @@ else
 
                     </div>
 
+
+
+                    <div class="group">
+                        <label class="checkbox-label toggle-label">
+                            <span class="label-text">
+                                Автоматически брать в работу подходящие ревью
+                            </span>
+
+                            <label class="switch">
+                                <input type="checkbox"
+                                       @bind="model.IsAutoGetReview" />
+                                <span class="slider"></span>
+                            </label>
+                        </label>
+
+                        <small class="hint">
+                            Система может назначать на вас новые опубликованные запросы на ревью
+                        </small>
+                    </div>
+
                     <div class="actions">
                         <button type="submit" class="btn-save">
                             Сохранить
@@ -167,6 +190,7 @@ else
         model.UserName = UserContext.Profile?.UserName ?? "";
         model.GitHubUrl = UserContext.Profile?.GitHubUrl ?? "";
         model.GitLabUrl = UserContext.Profile?.GitLabUrl ?? "";
+        model.IsAutoGetReview = UserContext.Profile?.IsAutoGetReview ?? false;
         _tags = UserContext.Profile?.Tags.ToList() ?? new ();
 
         previewAvatarUrl = AvatarUrlProvider.GetAvatarUrl(UserContext.Profile?.AvatarId);
@@ -206,6 +230,7 @@ else
             GitHubUrl = model.GitHubUrl,
             GitLabUrl = model.GitLabUrl,
             Tags = _tags.ToArray(),
+            IsAutoGetReview = model.IsAutoGetReview,
         });
 
         await UserContext.RefreshAsync();
@@ -231,6 +256,8 @@ else
         [RegularExpression(@"^https://gitlab\.com/.*",
         ErrorMessage = "Невалидный url")]
         public string? GitLabUrl { get; set; }
+
+        public bool IsAutoGetReview { get; set; }
     }
 
     private string tagInput = "";

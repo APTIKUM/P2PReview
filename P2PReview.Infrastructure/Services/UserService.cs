@@ -104,6 +104,7 @@ namespace P2PReview.Infrastructure.Services
             user.GitHubUrl = updateUserProfileDto.GitHubUrl ?? user.GitHubUrl;
             user.GitLabUrl = updateUserProfileDto.GitLabUrl ?? user.GitLabUrl;
             user.Tags = updateUserProfileDto.Tags ?? user.Tags;
+            user.IsAutoGetReview = updateUserProfileDto.IsAutoGetReview ?? user.IsAutoGetReview;
 
             await _userManager.UpdateAsync(user);
 

@@ -21,6 +21,8 @@ namespace P2PReview.Application.Users
         public string? GitHubUrl { get; set; } = null;
         public string? GitLabUrl { get; set; } = null;
 
+        public bool IsAutoGetReview { get; set; }
+
 
         public UserProfileDto(User user)
         {
@@ -36,6 +38,7 @@ namespace P2PReview.Application.Users
             GitLabUrl = user.GitLabUrl;
             Email = user.Email;
             Tags = user.Tags;
+            IsAutoGetReview = user.IsAutoGetReview;
         }
 
         public UserProfileDto()

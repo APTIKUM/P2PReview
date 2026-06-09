@@ -7,5 +7,7 @@
         public string? GitHubUrl { get; set; } = null;
         public string? GitLabUrl { get; set; } = null;
         public string[]? Tags { get; set; } = null;
+
+        public bool? IsAutoGetReview { get; set; }
     }
 }
