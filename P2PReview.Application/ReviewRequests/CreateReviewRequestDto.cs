@@ -10,5 +10,6 @@
         public int ReviewersCount { get; set; } = 2;
         public string? TechStack { get; set; }
         public List<string> Tags { get; set; } = new List<string>();
+        public bool IsAutoAssignReviewer { get; set; }
     }
 }

@@ -10,11 +10,13 @@ namespace P2PReview.Infrastructure.Services
     {
         private readonly AppDbContext _context;
         private readonly IUserService _userService;
+        private readonly INotificationsService _notificationsService;
 
-        public ReviewRequestService(IUserService userService, AppDbContext context)
+        public ReviewRequestService(IUserService userService, AppDbContext context, INotificationsService notificationsService)
         {
             _userService = userService;
             _context = context;
+            _notificationsService = notificationsService;
         }
 
         public async Task<Guid?> CreateReviewRequestAsync(CreateReviewRequestDto request,
@@ -57,9 +59,80 @@ namespace P2PReview.Infrastructure.Services
 
             await _context.SaveChangesAsync();
 
+            if (request.IsAutoAssignReviewer)
+            {
+
+                var reviewResponse = await AssignReviewer(reviewRequest);
+
+                if (reviewResponse == null)
+                {
+                    await _notificationsService.CreateNotificationAsync(new()
+                    {
+                        Title = "Ревьюер для вашего запроса не найдет!",
+                        UserId = authId,
+                        Url = $"review/request/{reviewRequest.Id}"
+                    });
+                }
+                else
+                {
+                    await _notificationsService.CreateNotificationAsync(new()
+                    {
+                        Title = "Ревьюер назначен!",
+                        UserId = authId,
+                        Url = $"review/request/{reviewRequest.Id}"
+                    });
+
+                    await _notificationsService.CreateNotificationAsync(new()
+                    {
+                        Title = "На вас назначено новое ревью!",
+                        UserId = reviewResponse.UserId,
+                        Url = $"review/response/{reviewResponse.Id}"
+                    });
+                }
+
+            }
+
             return Guid.Parse(reviewRequest.Id);
         }
 
+
+        private async Task<ReviewResponse?> AssignReviewer(ReviewRequest reviewRequest)
+        {
+            var tagSet = reviewRequest.Tags;
+
+            var users = await _context.Users
+                .Where(u => u.IsAutoGetReview
+                    && u.Id != reviewRequest.UserId)
+                .ToListAsync();
+
+            var candidate = users
+                .Where(u => u.Tags != null && u.Tags.Length > 0)
+                .Select(u => new
+                {
+                    User = u,
+                    MatchCount = u.Tags.Count(t => tagSet.Contains(t))
+                })
+                .OrderByDescending(x => x.MatchCount)
+                .FirstOrDefault();
+
+            if (candidate == null || candidate.MatchCount == 0)
+            {
+                return null;
+            }
+
+            var reviewResponse = new ReviewResponse
+            {
+                Id = Guid.NewGuid().ToString(),
+                UserId = candidate.User.Id,
+                ReviewRequestId = reviewRequest.Id,
+                CreatedAt = DateTime.UtcNow,
+            };
+
+            await _context.ReviewResponses.AddAsync(reviewResponse);
+            await _context.SaveChangesAsync();
+
+            return reviewResponse;
+        }
         public async Task<bool> DeleteReviewRequestAsync(string id)
         {
             var authId = await _userService.GetAuthUserId();
