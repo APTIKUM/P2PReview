@@ -25,7 +25,10 @@ namespace P2PReview.Infrastructure.Services
         {
             _env = env;
 
-            _uploadsAvatarsPath = Path.Combine(_env.WebRootPath, "uploads", "avatars");
+            _uploadsAvatarsPath = Path.Combine(_env.ContentRootPath,
+                "wwwroot",
+                "uploads",
+                "avatars");
 
             if (!Directory.Exists(_uploadsAvatarsPath))
             {
@@ -87,7 +90,7 @@ namespace P2PReview.Infrastructure.Services
         {
             using var stream = file.OpenReadStream(maxAllowedSize: MaxFileSize,
                 cancellationToken: ct);
-            
+
             using var reader = new StreamReader(stream);
 
             var content = await reader.ReadToEndAsync(ct);

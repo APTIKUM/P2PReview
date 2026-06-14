@@ -10,13 +10,14 @@ using P2PReview.Web.Services;
 using P2PReview.Web.State;
 
 var builder = WebApplication.CreateBuilder(args);
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite("Data Source=app.db"));
+    options.UseSqlite(connectionString));
 
 builder.Services
     .AddIdentity<User, IdentityRole>(options => 
