@@ -28,4 +28,13 @@ public class AuthController : ControllerBase
 
         return Redirect($"/profile/{userIdClaim}");
     }
+
+
+    [HttpGet("logout")]
+    public async Task<IActionResult> Logout()
+    {
+        await _authService.Logout();
+
+        return Redirect("/login");
+    }
 }

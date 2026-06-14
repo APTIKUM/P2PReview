@@ -17,10 +17,13 @@
             "Swift",
             "Dart",
             "C++",
+            "F#",
 
             // .NET
             "ASP.NET",
+            "ASP.NET Core",
             "Entity Framework",
+            "EF Core",
             "LINQ",
             "Blazor",
             "MAUI",
@@ -29,6 +32,16 @@
             ".NET Aspire",
             "SignalR",
             "MediatR",
+            "Minimal API",
+            "Web API",
+            "Dependency Injection",
+            "Middleware",
+            "Background Services",
+            "Hosted Services",
+            "FluentValidation",
+            "AutoMapper",
+            "Hangfire",
+            "Quartz.NET",
 
             // Frontend
             "React",
@@ -39,8 +52,17 @@
             "Svelte",
             "HTML",
             "CSS",
+            "SCSS",
             "Tailwind CSS",
             "Bootstrap",
+            "Redux",
+            "Zustand",
+            "TanStack Query",
+            "SSR",
+            "CSR",
+            "Hydration",
+            "Accessibility",
+            "State Management",
 
             // Databases
             "SQL",
@@ -51,6 +73,20 @@
             "MongoDB",
             "Redis",
             "ElasticSearch",
+            "Database Indexing",
+            "Data Modeling",
+            "Query Optimization",
+
+            // EF Core & Data Access
+            "EF Migrations",
+            "Repository Pattern",
+            "Unit of Work",
+            "Transactions",
+            "Optimistic Locking",
+            "Pessimistic Locking",
+            "Concurrency",
+            "N+1",
+            "Bulk Operations",
 
             // APIs
             "REST API",
@@ -70,6 +106,7 @@
             "CI/CD",
             "GitHub Actions",
             "Azure DevOps",
+            "GitLab CI",
 
             // Architecture
             "Clean Architecture",
@@ -77,10 +114,42 @@
             "CQRS",
             "Microservices",
             "Monolith",
+            "Modular Monolith",
             "Event Sourcing",
             "Event Driven",
             "Vertical Slice",
+            "Hexagonal Architecture",
+            "Onion Architecture",
+            "Layered Architecture",
+            "Domain Events",
+            "Application Services",
             "Design Patterns",
+
+            // Distributed Systems
+            "Distributed Systems",
+            "Eventual Consistency",
+            "Distributed Transactions",
+            "Fault Tolerance",
+            "Resilience",
+            "Retry Policies",
+            "Circuit Breaker",
+            "Rate Limiting",
+            "Idempotency",
+            "Outbox Pattern",
+            "Inbox Pattern",
+            "Saga Pattern",
+
+            // Messaging
+            "Message Brokers",
+            "RabbitMQ",
+            "Kafka",
+            "MassTransit",
+            "Message Queue",
+            "Pub/Sub",
+            "Event Processing",
+            "Dead Letter Queue",
+            "Consumer Design",
+            "Producer Design",
 
             // Testing
             "Testing",
@@ -91,19 +160,22 @@
             "xUnit",
             "NUnit",
             "Moq",
+            "TestContainers",
 
-            // Code Review Topics
-            "Refactoring",
-            "Code Quality",
-            "Best Practices",
-            "SOLID",
+            // Performance
             "Performance",
-            "Security",
-            "Scalability",
-            "Maintainability",
-            "Readability",
+            "High Load",
+            "Memory Optimization",
+            "CPU Optimization",
+            "Benchmarking",
+            "Profiling",
+            "Load Testing",
+            "Asynchronous Programming",
+            "Parallelism",
+            "Multithreading",
 
-            // Authentication & Security
+            // Security
+            "Security",
             "Authentication",
             "Authorization",
             "JWT",
@@ -111,15 +183,27 @@
             "OpenID Connect",
             "Identity",
             "OWASP",
+            "Cryptography",
+            "Password Hashing",
+            "Secrets Management",
+            "CSRF",
+            "XSS",
+            "SQL Injection",
+            "CORS",
+            "API Security",
+            "Secure Coding",
 
-            // Infrastructure
+            // Infrastructure & Observability
             "Logging",
             "Monitoring",
             "Caching",
-            "Distributed Systems",
-            "Message Brokers",
-            "RabbitMQ",
-            "Kafka",
+            "OpenTelemetry",
+            "Tracing",
+            "Metrics",
+            "Structured Logging",
+            "Distributed Tracing",
+            "Prometheus",
+            "Grafana",
 
             // Mobile
             "Android",
@@ -135,6 +219,40 @@
             "RAG",
             "Vector Database",
             "Prompt Engineering",
+            "AI Agents",
+            "MCP",
+            "Semantic Kernel",
+            "LangChain",
+            "Embeddings",
+            "Function Calling",
+            "Tool Calling",
+            "Agentic Systems",
+
+            // Review Topics
+            "Refactoring",
+            "Code Quality",
+            "Best Practices",
+            "SOLID",
+            "Scalability",
+            "Maintainability",
+            "Readability",
+            "Code Smell",
+            "Anti Patterns",
+            "Technical Debt",
+            "Architecture Review",
+            "Bug Hunt",
+
+            // Business Domains
+            "Payments",
+            "E-Commerce",
+            "FinTech",
+            "Banking",
+            "CRM",
+            "ERP",
+            "Healthcare",
+            "EdTech",
+            "Gaming",
+            "SaaS",
 
             // General
             "Algorithms",
@@ -143,7 +261,20 @@
             "Interview Task",
             "Pet Project",
             "Legacy Code",
-            "Startup MVP"
+            "Legacy Refactoring",
+            "Startup MVP",
+            "Production Bug",
+            "Production Incident",
+            "Senior Review",
+            "System Review",
+
+            // Levels
+            "Junior",
+            "Middle",
+            "Senior",
+            "Lead",
+            "Staff",
+            "Principal"
         ];
     }
 }

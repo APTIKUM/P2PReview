@@ -6,5 +6,6 @@ namespace P2PReview.Application.Interfaces
     {
         public Task<(bool Success, IEnumerable<string>? Errors)> LoginAsync(LoginCommand loginCommand);
         public Task<(bool Success, IEnumerable<string>? Errors)> RegisterAsync(RegisterCommand registerCommand);
+        public Task<bool> Logout();
     }
 }

@@ -38,6 +38,20 @@ namespace P2PReview.Infrastructure.Services
             return (true, null);
         }
 
+        public async Task<bool> Logout()
+        {
+            try
+            {
+                await _signInManager.SignOutAsync();
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
         public async Task<(bool Success, IEnumerable<string>? Errors)> RegisterAsync(RegisterCommand registerCommand)
         {
             var existingUser = await _userManager.FindByEmailAsync(registerCommand.Email);
