@@ -55,7 +55,7 @@ nav {
 }
 
 h1 {
-    font-size: clamp(48px, 7vw, 96px);
+    font-size: clamp(48px, 6vw, 96px);
     line-height: .9;
     letter-spacing: -0.075em;
     margin: 30px 0 28px;
