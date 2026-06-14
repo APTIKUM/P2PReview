@@ -32,7 +32,8 @@
 
 
         <img class="profile-avatar"
-             src="@AvatarUrlProvider.GetAvatarUrl(profile?.AvatarId)" />
+             src="@AvatarUrlProvider.GetAvatarUrl(profile?.AvatarId)"
+             onerror="this.onerror=null;this.src='/uploads/avatars/default-avatar.png';" />
 
         <h1 class="username">
             @profile?.UserName

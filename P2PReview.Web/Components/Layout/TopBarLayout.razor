@@ -53,7 +53,8 @@
 
                 <a href="/profile" class="profile-link">
                     <img class="avatar-topbar"
-                         src="@AvatarUrlProvider.GetAvatarUrl(UserContext.Profile?.AvatarId)" />
+                         src="@AvatarUrlProvider.GetAvatarUrl(UserContext.Profile?.AvatarId)"
+                         onerror="this.onerror=null;this.src='/uploads/avatars/default-avatar.png';" />
                 </a>
 
             </div>

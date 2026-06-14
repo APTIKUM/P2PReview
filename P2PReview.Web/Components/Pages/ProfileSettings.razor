@@ -39,7 +39,7 @@ else
                     </div>
     
                     <label class="avatar-upload">
-                        <img src="@previewAvatarUrl" class="avatar-img" />
+                        <img src="@previewAvatarUrl" class="avatar-img" onerror="this.onerror=null;this.src='/uploads/avatars/default-avatar.png';" />
                         <InputFile OnChange="OnAvatarSelected"
                                    accept=".jpg,.jpeg,.png,image/jpeg,image/png"
                                    hidden />
